@@ -12,3 +12,8 @@ node_modules/
 
 # Local design reference (never commit)
 ui/
+
+# Frontend
+frontend/node_modules/
+public/
+frontend/dist/
