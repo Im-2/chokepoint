@@ -62,5 +62,36 @@ honestly left over. The decoy is not used.
 `propose_change` finds the team that owns the edge's **destination** asset by traversing `OWNS`
 (the change is made on the protected resource, e.g. the role's trust policy).
 
+### MCP: the same tools, discovered not hard-coded
+`app/mcp_server.py` wraps the nine tools with typed arguments using the official Python MCP SDK
+(v2.x, where FastMCP is now called `MCPServer`). It is mounted at `/mcp` as **stateless streamable
+HTTP** (every request is independent, no session ids), which is what serverless needs. The agent
+does not keep a private tool list: it connects to the same server over the SDK's in-memory
+transport, lists the tools and gives them to the model. REST, MCP and the agent all call the same
+functions, and a test checks that an MCP result equals the REST result.
+DNS-rebinding protection is switched off on purpose (it protects a developer's localhost; this is a
+public API on a real hostname). The write tools (`propose_change`, `record_decision`) are exposed on
+`/mcp` like on REST, with no authentication; only `/api/reset` has a token.
+
+### Two ways to answer: router and LLM, one safety net
+`CHAT_ENABLED=false`, no API key, a rate limit or any LLM error all lead to the **router**: regex
+rules pick a tool and a template writes one sentence from the tool rows. With a free LLM (Groq
+first, Gemini second) the model picks tools (at most 6 calls) and writes one sentence. The
+**answer checker** then runs on that sentence: every asset name and edge id must appear in the tool
+results, every number must appear there too (0 to 10 are always allowed), "safe" is rejected unless
+negated, no claims of impact when nothing was found, "verified" only after `simulate_fix`, and the
+agent can never claim to approve or reject. If the checker rejects it, the templated sentence is
+returned with `checked: false` and the reason. Unicode dashes are folded to `-` first, so a name
+written with a non-breaking hyphen cannot slip past. The checker treats any hyphenated word as a
+name, so ordinary hyphenated words get rejected too: that errs on the safe side, and the system
+prompt asks the model to avoid them.
+The model never sees `record_decision`: it is not offered and, if the model asks for it anyway, it
+is refused. Only humans decide.
+
+### Free-tier limits shaped the design
+Tool results are compacted before the model sees them (names and numbers, no trace, at most 4,500
+characters), the system prompt is short, and tool descriptions are trimmed, because free tiers allow
+only about 6,000 tokens a minute. Full detail goes to the HTTP response (the frontend), not the model.
+
 ## Judge questions
 (Filled in at Phase 6.)

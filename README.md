@@ -28,3 +28,14 @@ disabled (403); a missing or wrong header gets 401. Reseeding from the command l
 python -m uvicorn app.main:app --port 8000      # then open http://127.0.0.1:8000/docs
 python -m scripts.demo_run                      # runs the whole demo over HTTP, resets at start and end
 ```
+
+### MCP and chat
+- **MCP:** the nine tools are served at `/mcp` (stateless streamable HTTP). Point any MCP client at
+  `http://127.0.0.1:8000/mcp`.
+- **Chat:** `POST /api/chat` streams server-sent events (`tool_call`, `tool_result`, `final`).
+  It works with **no LLM at all** (deterministic router). To use a free LLM set `LLM_BASE_URL`,
+  `LLM_API_KEY`, `LLM_MODEL` in `.env` (Groq free tier; verified model: `openai/gpt-oss-120b`,
+  `llama-3.3-70b-versatile` is no longer offered by Groq). `CHAT_ENABLED=false` forces router mode.
+  Every model sentence passes an answer checker; if it fails, a templated sentence is returned with
+  `checked: false`.
+- Try it: `python -m scripts.chat_run "Can intern-laptop reach prod-customer-db? Why?"`
