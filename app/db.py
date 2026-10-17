@@ -1,10 +1,14 @@
 """FalkorDB connection and graph selection. No module-level state beyond the client."""
+from functools import lru_cache
+
 from falkordb import FalkorDB
 
 from app import config
 
 
+@lru_cache(maxsize=1)
 def get_client() -> FalkorDB:
+    # one connection pool per process; holds no application state
     return FalkorDB(
         host=config.FALKORDB_HOST,
         port=config.FALKORDB_PORT,

@@ -3,6 +3,9 @@ from app import queries
 from app.seed import CHOKE_EDGE, CORE_ASSETS, DECOY_EDGE, KEBAB, build_environment
 
 
+LIM = {"limit": 500}
+
+
 def rows(g, text, params=None):
     return g.ro_query(text, params).result_set
 
@@ -31,16 +34,16 @@ def test_entries_and_crowns(seeded_graph):
 
 
 def test_shortest_entry_to_crown_is_exactly_4_hops(seeded_graph):
-    paths = rows(seeded_graph, queries.attack_paths(8))
+    paths = rows(seeded_graph, queries.attack_paths(8), LIM)
     assert min(p[2] for p in paths) == 4
-    assert rows(seeded_graph, queries.attack_paths(2)) == []
-    assert rows(seeded_graph, queries.attack_paths(3)) == []
-    depth4 = rows(seeded_graph, queries.attack_paths(4))
+    assert rows(seeded_graph, queries.attack_paths(2), LIM) == []
+    assert rows(seeded_graph, queries.attack_paths(3), LIM) == []
+    depth4 = rows(seeded_graph, queries.attack_paths(4), LIM)
     assert any("svc-legacy-etl" in p[0] for p in depth4)
 
 
 def test_path_count_is_in_target_range(seeded_graph):
-    assert 10 <= len(rows(seeded_graph, queries.attack_paths(8))) <= 30
+    assert 10 <= len(rows(seeded_graph, queries.attack_paths(8), LIM)) <= 30
 
 
 def test_decoy_is_on_most_paths_and_choke_is_cheap(seeded_graph):
@@ -54,12 +57,13 @@ def test_decoy_is_on_most_paths_and_choke_is_cheap(seeded_graph):
     decoy, choke = by_pair[DECOY_EDGE], by_pair[CHOKE_EDGE]
     assert freq[0][0] == decoy[0]            # decoy has the most paths_through
     assert decoy[2] == 9 and choke[2] <= 2   # but is the most disruptive
-    assert choke[4] > 0.5 * len(rows(seeded_graph, queries.attack_paths(8)))  # choke is on most paths
+    assert choke[6] > 0.5 * len(rows(seeded_graph, queries.attack_paths(8), LIM))  # choke is on most paths
 
 
 def test_noise_never_reaches_a_crown_jewel(seeded_graph):
     core = {a[0] for a in CORE_ASSETS}
-    for via, _, _ in rows(seeded_graph, queries.attack_paths(8)):
+    for row in rows(seeded_graph, queries.attack_paths(8), LIM):
+        via = row[0]
         assert set(via) <= core
 
 

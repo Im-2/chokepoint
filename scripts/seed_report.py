@@ -23,22 +23,22 @@ def main(name: str):
     print("crowns:", [r[0] for r in q("MATCH (a:Asset {crown:true}) RETURN a.name ORDER BY a.name")])
 
     for d in (2, 3, 4, 8):
-        print(f"attack paths at depth {d}: {len(q(queries.attack_paths(d)))}")
+        print(f"attack paths at depth {d}: {len(q(queries.attack_paths(d), {"limit": 500}))}")
 
-    paths = q(queries.attack_paths(8))
+    paths = q(queries.attack_paths(8), {"limit": 500})
     shortest = paths[0][2]
     print(f"\nshortest entry->crown path: {shortest} hops")
-    for via, _, hops in paths:
+    for via, _, hops, *_ in paths:
         if hops == shortest:
             print("  ", " -> ".join(via))
     print("path length histogram:", {h: sum(1 for p in paths if p[2] == h) for h in sorted({p[2] for p in paths})})
 
     freq = q(queries.choke_edge_frequency(8))
     print("\ntop edges by paths_through (naive ranking):")
-    for edge_id, kind, dis, fix, n in freq[:6]:
+    for edge_id, kind, dis, fix, _s, _d, n in freq[:6]:
         print(f"  {edge_id}  paths={n:<3} disruption={dis:<2} ratio={n/dis:.2f}  {fix}")
     print("top edges by paths_through / disruption (cost-aware):")
-    for edge_id, kind, dis, fix, n in sorted(freq, key=lambda r: -r[4] / r[2])[:6]:
+    for edge_id, kind, dis, fix, _s, _d, n in sorted(freq, key=lambda r: -r[6] / r[2])[:6]:
         print(f"  {edge_id}  paths={n:<3} disruption={dis:<2} ratio={n/dis:.2f}  {fix}")
 
     # Greedy preview: repeatedly pick the edge cutting most remaining paths per disruption.
@@ -46,6 +46,8 @@ def main(name: str):
     remaining = [set(p[1]) for p in paths]
     total, chosen = len(remaining), []
     for budget in (1, 2, 3):
+        if not remaining:
+            break
         best = max(info, key=lambda e: sum(1 for p in remaining if e in p) / info[e][0]
                    if e not in chosen else -1)
         chosen.append(best)

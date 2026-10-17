@@ -4,10 +4,10 @@ Status: ✅ done · 🟡 partial / planned · ⬜ not started. Re-checked before
 
 | # | Rule | Where this repo satisfies it | Status |
 |---|------|------------------------------|--------|
-| 1 | FalkorDB central and essential | Path enumeration, choke ranking, shortest path, centrality, scratch-graph simulation and decision memory all run in FalkorDB (`app/queries.py`, `app/tools.py`). README table "Why FalkorDB can't be removed". | ⬜ (Phase 2, 6) |
+| 1 | FalkorDB central and essential | Path enumeration, choke ranking, shortest path, centrality, scratch-graph simulation and decision memory all run in FalkorDB (`app/queries.py`, `app/tools.py`). README table "Why FalkorDB can't be removed". | 🟡 tools built (Phase 2); README table in Phase 6 |
 | 2 | Synthetic data only | `app/seed.py` generates everything from `random.Random(7)`; no real credentials or infrastructure. `.env` is git-ignored. | ✅ seed built (Phase 1) |
 | 3 | README with setup + graph data model | `README.md` (data model, setup, Cloud and Docker options) | 🟡 stub with setup; data model in Phase 6 |
-| 4 | Cypher queries / algorithms list | `app/queries.py` (all Cypher) + `docs/QUERIES.md` | 🟡 2 queries + verified algos listed |
+| 4 | Cypher queries / algorithms list | `app/queries.py` (all Cypher) + `docs/QUERIES.md` | ✅ all current queries documented in docs/QUERIES.md |
 | 5 | Demo video | Script in `docs/DEMO_SCRIPT.md`; video link in README | ⬜ (Phase 6, human records) |
 | 6 | Deployment or local setup instructions | README: FalkorDB Cloud + `docker-compose.yml` (optional local); Vercel in Phase 8 | 🟡 compose file exists (README marks it untested) |
 | 7 | AI-assistance disclosure | README section; `docs/WALKTHROUGH.md` shows the human can explain the design | ⬜ (Phase 6) |
