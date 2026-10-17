@@ -23,10 +23,13 @@ for i, seg in enumerate(ids):
     nxt = (starts[ids[i + 1]] - trim) if i + 1 < len(ids) else None
     gap = f"{nxt - (start + durations[seg]):+.1f}s" if nxt is not None else "-"
     print(f"  {seg:<20} start {start:6.1f}  len {durations[seg]:5.1f}  gap {gap}")
-    t = start + min(4.0, durations[seg] * 0.6)
-    path = out / f"{i:02d}_{seg}.png"
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", f"{t:.2f}", "-i", str(video), "-frames:v", "1", str(path)], check=True)
-    frames.append(path)
+    # one frame per segment, plus a second, later frame in the scenes with the most going on
+    fractions = [0.55] + ([0.92] if seg in ("s02_problem", "s03_graph", "s09_propose_reject", "s10_replan_memory", "s12_close") else [])
+    for k, f in enumerate(fractions):
+        t = start + durations[seg] * f
+        path = out / f"{i:02d}_{k}_{seg}.png"
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", f"{t:.2f}", "-i", str(video), "-frames:v", "1", str(path)], check=True)
+        frames.append(path)
 
 for n in range(0, len(frames), 4):
     group = frames[n:n + 4]

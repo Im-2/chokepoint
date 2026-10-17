@@ -50,7 +50,7 @@ OVERLAY_JS = r"""
     background:radial-gradient(ellipse 60% 50% at 50% 12%,#f85111,#ca240a 38%,#80170c 62%,#300d08 82%,#050202);opacity:0;transition:opacity .8s;pointer-events:none;color:#fafaf5}
   #__end.on{opacity:1}
   #__end h1{font:400 120px/1 'Instrument Serif',Georgia,serif;margin:0}
-  #__end p{font:500 26px/1.4 Inter,system-ui,sans-serif;margin:0;opacity:.92}
+  #__end p{font:500 28px/1.4 'JetBrains Mono',ui-monospace,Consolas,monospace;margin:0;opacity:.95}
   #__end small{font:500 18px/1.4 Inter,system-ui,sans-serif;opacity:.7;letter-spacing:.08em;text-transform:uppercase}`;
   const style = document.createElement('style'); style.textContent = css;
   const cur = document.createElement('div'); cur.id = '__cur';
@@ -415,8 +415,10 @@ def run():
         page.keyboard.press("Escape")
         R.click(page.get_by_role("button", name="Check reach"), 0.8)
         page.wait_for_function("[...document.querySelectorAll('.badge')].some(b => b.textContent === 'Unknown asset')")
-        R.bring_in(".console__right", ".badge--warn", 0.8, 0.3)
-        R.check(True, "unknown asset reported")
+        top = page.evaluate("document.querySelector('.console__right').scrollTop")
+        R._scroll("document.querySelector('.console__right')", -top, 1.0)   # back to the top: the result card
+        R.check("Unknown asset" in page.locator(".console__right .card").first.inner_text(), "unknown asset shown at the top of the results")
+        R.hover(page.locator(".console__right .note--warn").first, 0.8)
         R.end_segment("s11_unknown")
 
         # =============== s12 trace and close ===============
@@ -449,7 +451,8 @@ def mix(video: Path, trim: float, starts: dict):
         delay = max(0, int(round((starts[seg["id"]] - trim) * 1000)))
         filters.append(f"[{i}:a]adelay={delay}|{delay}[a{i}]")
         labels.append(f"[a{i}]")
-    filters.append("".join(labels) + f"amix=inputs={len(labels)}:normalize=0:dropout_transition=0[aout]")
+    filters.append("".join(labels) + f"amix=inputs={len(labels)}:normalize=0:dropout_transition=0[mixed]")
+    filters.append("[mixed]loudnorm=I=-16:TP=-1.5:LRA=11[aout]")
     cmd = ["ffmpeg", "-v", "error", "-y", *inputs, "-filter_complex", ";".join(filters), "-map", "0:v", "-map", "[aout]",
            "-c:v", "libx264", "-preset", "medium", "-crf", "20", "-pix_fmt", "yuv420p", "-r", "25",
            "-c:a", "aac", "-b:a", "160k", "-ar", "44100", "-movflags", "+faststart", str(OUT_MP4)]

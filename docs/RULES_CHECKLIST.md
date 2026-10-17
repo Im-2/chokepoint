@@ -8,7 +8,7 @@ Status: ✅ done · 🟡 partial / planned · ⬜ not started. Re-checked before
 | 2 | Synthetic data only | `app/seed.py` generates everything from `random.Random(7)`; no real credentials or infrastructure. `.env` is git-ignored. | ✅ seed built (Phase 1) |
 | 3 | README with setup + graph data model | `README.md` (data model, setup, Cloud and Docker options) | ✅ README has setup and the graph data model |
 | 4 | Cypher queries / algorithms list | `app/queries.py` (all Cypher) + `docs/QUERIES.md` | ✅ all current queries documented in docs/QUERIES.md |
-| 5 | Demo video | Script in `docs/DEMO_SCRIPT.md`; video link in README | 🟡 script ready (docs/DEMO_SCRIPT.md); the video itself is for the developer to record, link goes in the README |
+| 5 | Demo video | Script in `docs/DEMO_SCRIPT.md`; recorded as `demo/chokepoint-demo.mp4` (not committed); "Demo video: <link>" placeholder in the README | 🟡 recorded and verified; upload it and paste the link into the README |
 | 6 | Deployment or local setup instructions | README: FalkorDB Cloud + `docker-compose.yml` (optional local); live on Vercel | ✅ live at https://trychokepoint.vercel.app, verified; local setup documented; compose file untested and marked so |
 | 7 | AI-assistance disclosure | README section; `docs/WALKTHROUGH.md` shows the human can explain the design | ✅ README section "AI-assistance disclosure"; study guide docs/WALKTHROUGH.md |
 | 8 | Track 01 named | README top section | ✅ README section "AI-assistance disclosure"; study guide docs/WALKTHROUGH.md |
@@ -32,7 +32,7 @@ with MIT license; history scrubbed and scanned clean (a fresh clone of the remot
 the real `.env` values); local setup instructions; `.env` never committed.
 
 Still missing or open (be honest in the submission):
-- **Demo video:** not recorded (the developer records it; script is ready). Add the link to the README.
+- **Demo video:** recorded and verified (demo/chokepoint-demo.mp4, local, git-ignored). Upload it and paste the link into the README line "Demo video: <link>".
 - **Live deployment:** done in Phase 8 (https://trychokepoint.vercel.app). Keep it working until judging.
 - **Frontend:** built (Phase 7) and deployed with the API; verified in a real browser, locally and on the live URL.
 - **Untested:** `docker-compose.yml` (no Docker on the dev machine) and the Gemini fallback settings.

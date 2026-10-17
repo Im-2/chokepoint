@@ -1,63 +1,63 @@
-# Demo script (3 minutes)
+# Demo video script (about 3.8 minutes)
 
-Numbers below come from the seeded graph `env:acme` and were produced by `python -m scripts.demo_run`
-against FalkorDB Cloud. They are deterministic (seed 7), so they will match on your run.
-Each step is one API call. When the frontend exists, each step is one button; the calls are the same.
+A real, unedited run against the live site, https://trychokepoint.vercel.app, recorded by `demo/record_demo.py`
+(Playwright, Chromium, 1920x1080, visible cursor, slow scrolling). Captions and the end card are overlays; every
+result on screen comes from the live API and is asserted by the recorder as it goes (a wrong number aborts the take).
+**The voiceover is AI-generated** (ElevenLabs) and the video says so in its first caption and on the end card.
 
-**Setup (before recording):** server running (`python -m uvicorn app.main:app --port 8000`) and the
-graph freshly reset:
+Length: 3:46 of video with 211 s of speech. The chat scene ("Ask Chokepoint") is about 35 s.
 
-```bash
-BASE=https://trychokepoint.vercel.app      # or http://127.0.0.1:8000 for a local server
-curl -s -X POST $BASE/api/reset -H "X-Reset-Token: $RESET_TOKEN"     # 130 assets, 322 PIVOT edges
-```
-
-Optional for a clean take: `python -m scripts.demo_run` runs the whole story below in the terminal.
-
-| Time | Say | Call | What you see |
-|---|---|---|---|
-| 0:00 | "Chokepoint is an agent over a FalkorDB graph of a company's cloud. It finds how an attacker gets from the internet to the crown jewels, and the cheapest way to cut those paths." Show the graph in the Browser/`/api/graph`: 130 assets, 3 entry points, 2 crown jewels. | `GET /api/graph` | nodes + edges |
-| 0:20 | **Depth contrast.** "Scan two hops: nothing. But that is not 'safe', it is 'not modelled within 2 hops'." | `POST /api/scan {"depth":2}` | `not_in_graph`, note says not a statement the asset is safe |
-| 0:35 | "Four hops: a hidden path through `svc-legacy-etl`, a forgotten service account." | `POST /api/scan {"depth":4}` | 1 path, 4 hops: `ci-leaked-token -> svc-legacy-etl -> role-ci-deployer -> role-prod-admin -> prod-customer-db` |
-| 0:50 | "Depth 8: the full picture, 19 attack paths." | `POST /api/scan {"depth":8}` | 19 paths (1 of 4 hops, 13 of 5, 5 of 6) |
-| 1:00 | **Ask a question.** "Can the intern's laptop reach the customer database? Why?" | `POST /api/reach {"from_name":"intern-laptop","to_name":"prod-customer-db"}` | yes, 5 hops via `grp-interns`, `grp-platform-eng`, `role-ci-deployer`, `role-prod-admin`; attacker cost 8; the path comes back with the answer |
-| 1:15 | **Plan.** "Which edge do we cut? Ranking by most paths picks the wrong one." | `POST /api/choke {}` | most paths: `e026` 15 paths but disruption 9 (a decoy). Best ratio: `e023` 11 paths, disruption 2 (score 5.5) |
-| 1:30 | "The planner picks by paths cut per disruption." | `POST /api/plan {"budget":3}` | `e023` (cuts 11) + `e022` jump-host trust (cuts 8) = 19 of 19, total disruption 5, uses 2 of 3 budget |
-| 1:40 | "With a budget of one, it would cut 11 of 19 and say 8 remain." | `POST /api/plan {"budget":1}` | cut 11/19, 8 remain |
-| 1:50 | **Simulate.** "Prove it: copy the graph, apply the fix on the copy, re-run the path search." | `POST /api/simulate {"edge_ids":["e023","e022"]}` | 19 paths before, **0 after**; scratch graph deleted. (Only `e023`: 19 -> 8) |
-| 2:05 | **Propose.** "File the change for the owning team." | `POST /api/propose {"edge_ids":["e023"],"plan_note":"Top edge of the greedy plan"}` | owner `platform-eng` (found by traversal), ticket markdown, config diff, status `proposed` (note the `run` id) |
-| 2:15 | **Human rejects with a reason.** | `POST /api/decision {"decision_id":"<run id>","action":"reject","reason":"CI needs prod-admin during releases"}` | `recorded` |
-| 2:25 | **Re-plan.** "The agent reads the rejection from the graph and chooses another route." | `POST /api/plan {"budget":3}` | excludes `e023`; picks `e013` (`svc-legacy-etl` trust, disruption 1), `e022` (3), `e015` (`svc-backup-agent` trust, 2): cuts 15 of 19, total disruption 6, **4 remain** (reported honestly). The decoy is not used. |
-| 2:40 | "Memory is in the graph, so it survives restarts." | `GET /api/decisions` | the new rejection dated today, plus the seeded history (`e029` rejected, `e040` approved) |
-| 2:45 | **Honesty.** | `POST /api/reach {"from_name":"ghost-host-99","to_name":"prod-customer-db"}` | `unknown_asset`, only `resolve_asset` ran, nothing was searched |
-| 2:52 | | `POST /api/reach {"from_name":"srv-alpha-01","to_name":"prod-customer-db"}` | `not_in_graph`: "no modelled path ... not a statement that the asset is safe" |
-| 2:57 | "The tools are also an MCP server at `/mcp`, and the chat works with a free model or none." | `python -m scripts.chat_run "Simulate the plan and tell me whether the fix is verified"` | the model calls `plan_remediation` then `simulate_fix`; answer is checked against the tool results |
-
-**Close (3:00):** "FalkorDB does the work: path enumeration, choke ranking, shortest path,
-scratch-graph simulation and decision memory. Take it away and none of this exists."
-
-## Recording it in the console (same story, same numbers)
-Open https://trychokepoint.vercel.app and press **Launch console**. Each step is a button; the right panels and the graph update.
-
-| Story step | In the console |
+## Numbers the narration uses (all from the live run)
+| Fact | Value |
 |---|---|
-| Depth contrast | Slider to 2, **Scan** (note "not a statement that the asset is safe"); slider to 4, **Scan** (1 path); slider to 8, **Scan** (19 paths); click a path to highlight it |
-| Ask a question | Pickers `intern-laptop` and `prod-customer-db`, **Check reach** (5 hops) |
-| Plan | **Rank choke edges** (decoy marked), budget 3, **Plan remediation** (2 edges, 19 of 19) |
-| Simulate | **Simulate on a scratch copy**, then toggle Before / After (19 to 0, removed edges drawn cut) |
-| Propose and decide | **Propose change**, then **Reject...** with a reason; **Plan remediation** again (the rejected edges are skipped; the UI rejects the whole proposal) |
-| Honesty | Reach from `ghost-host-99` (Unknown asset) and from `srv-alpha-01` (No modelled path) |
-| Chat | Dock **Ask Chokepoint**, click a suggested prompt; point at the tool chip, the "checked" badge and the mode indicator |
+| Environment | 130 assets, 322 `PIVOT` (attack) edges, synthetic |
+| Paths at depth 2 and 3 | 0 (worded as "no modelled path", never "safe") |
+| Paths at depth 4 | 1, through `svc-legacy-etl` |
+| Paths at depth 8 | 19 |
+| Decoy edge `role-prod-admin -> prod-customer-db` (e026) | on 15 paths, disruption 9 |
+| Best edge `role-ci-deployer -> role-prod-admin` (e023) | on 11 paths, disruption 2 |
+| Plan, budget 3 | 2 edges, cuts 19 of 19, total disruption 5 |
+| Simulation on a scratch graph | 19 paths before, 0 after, scratch graph deleted |
+| After rejecting e023 and re-planning | 15 of 19 cut, total disruption 6, 4 remain |
 
-After recording, restore the demo state with the reset call above (needs the token).
+## Script
+| Time | Scene | Narration (spoken) | On screen |
+|---|---|---|---|
+| 0:00 | Landing | This is Chokepoint. One thing first: this voiceover is AI-generated. Everything you see on screen is the real product, running live, and none of the results are edited. | Landing hero. Caption: the voiceover is AI-generated and this is a real run on the live site. |
+| 0:12 | Landing | Every company has crown-jewel data, like a customer database. The hard question is simple: how could an attacker actually get there, and what is the smallest change that stops them? A spreadsheet of permissions cannot answer that. A graph can. | Slow scroll; the statement brightens word by word (scroll-linked). |
+| 0:28 | Console | This is a synthetic cloud: one hundred and thirty assets and three hundred and twenty-two attack edges, stored in FalkorDB, the primary database behind everything you will see. Assets are nodes. Every possible pivot is an edge, with a cost and a disruption score. | The three step cards, then the console. Hover the stat tiles (130 assets, 322 connections) and the graph. |
+| 0:45 | Depth contrast | Scan two hops, and there is nothing. Zero paths. Three hops, still zero. But read the wording. No modelled path is not the same as safe. | Slider to 2, **Scan**: 'No modelled attack path within 2 hops ... not a statement that the asset is safe'. Slider to 3, **Scan**: same. |
+| 0:56 | Depth contrast | At four hops, one path appears. It runs through svc-legacy-etl, a forgotten service account that nobody had modelled as dangerous. It assumes a deploy role, which assumes an admin role, which reaches the customer database. Go deeper, to eight hops, and there are nineteen paths. | Slider to 4, **Scan**: 1 path through `svc-legacy-etl`, highlighted on the graph. Slider to 8, **Scan**: 19 paths; click the shortest. |
+| 1:16 | Choke edges | Which edge do we fix? Rank by paths through it, and you get this one: fifteen paths. But its disruption is nine out of ten. Cut it, and you break production. That is the decoy. Rank by paths cut per unit of disruption, and another edge wins: eleven paths, at a disruption of two. | **Rank choke edges**. The decoy row (15 paths, disruption 9) is hovered and clicked, then the best row (11 paths, disruption 2). |
+| 1:37 | Plan and simulate | The planner picks two edges. Together they cut all nineteen paths, at a total disruption of five. It says plainly that this is a greedy heuristic, not a proof. So we prove it: copy the graph, apply the fix to the copy, search again. Nineteen paths before. Zero after. The copy is deleted. | **Plan remediation** (2 edges, 19 of 19, disruption 5), **Simulate on a scratch copy** (19 to 0, scratch graph deleted), toggle Before / After. |
+| 1:57 | Ask Chokepoint | Now the same graph, through chat. Ask Chokepoint. | Open the docked chat, 'Ask Chokepoint'. |
+| 2:02 | Ask Chokepoint | The model can only choose from a fixed catalogue of tools, over the Model Context Protocol. It never writes Cypher. Here it picks the reachability tool, and gets the five-hop path. | Click the suggested prompt 'Can intern-laptop reach prod-customer-db?': tool chip `explain_reachability`, the 5-hop path, 'checked' badge. |
+| 2:13 | Ask Chokepoint | Next, plan and simulate. It plans first, then simulates exactly the edges the plan chose, and the trace fills with every query. | Open the Trace panel. Prompt 'Plan a fix with budget 3 and simulate it.': `plan_remediation` then `simulate_fix`; the trace fills with every query. |
+| 2:22 | Ask Chokepoint | Now the honest one. Is this machine safe? No path is modelled, and that is not a statement that it is safe. An answer checker rejects any sentence naming an asset the graph did not return. | Prompt 'Is srv-alpha-01 safe?': 'no modelled path ... not a statement that the asset is safe'. |
+| 2:34 | Human decision | Back to the fix. Propose just the first edge. A change record is written, with an owning team found by traversing the graph, a ticket, and a config diff. Only a person can approve or reject. I reject it, with a reason: C I needs prod-admin during releases. | Close the chat. **Propose only this edge** on the first plan step (e023): ticket, owner team, config diff. **Reject...**, type the reason, **Reject with reason**. |
+| 2:53 | Memory | Now re-plan. The agent reads that decision from the graph, skips the rejected edge, and finds three cheaper ones. Fifteen of nineteen paths cut, total disruption six, and it says plainly that four remain. The memory lives in the graph, so it survives restarts. | **Plan remediation** again: the rejected edge is skipped; 15 of 19 cut, disruption 6, 4 remain. Then the decision memory. |
+| 3:11 | Honesty | Ask about an asset that does not exist, and you get unknown asset. No query runs at all. | Reach from `ghost-host-99`: 'Unknown asset ... Nothing was searched'; the trace shows only name lookups. |
+| 3:21 | Trace and close | Every response carries its own trace. The same nine tools are an MCP server that any agent can use. FalkorDB does the work: path search, choke ranking, shortest paths, scratch-graph simulation, and decision memory. Take it away, and none of this exists. This was Chokepoint, for Graph Hacks, Track one. | Trace panel and the MCP endpoint button, then the end card. |
 
-## Optional chat segment (if time)
+## The chat scene
+Three prompts, all read-only for the graph except that they update the console like the buttons do:
+1. "Can intern-laptop reach prod-customer-db?" calls `explain_reachability` and shows the 5-hop path.
+2. "Plan a fix with budget 3 and simulate it." calls `plan_remediation` first, then `simulate_fix` with **that plan's edges** (enforced in code).
+3. "Is srv-alpha-01 safe?" calls `explain_reachability` with only the source, which checks every crown jewel; the answer is "no modelled path" plus the plain statement that this is not a claim of safety (added in code if the model leaves it out).
+
+The model picks from the fixed tool catalogue over MCP and never writes Cypher; the answer checker rejects any sentence that names an asset the tools did not return, calls something safe, or claims a verified fix while paths remain. If the free-tier model were rate limited the recorder would stop and report it (it does not silently switch to router mode on camera).
+
+## Voice
+Used: **George - Warm, Captivating Storyteller** (ElevenLabs premade voice).
+Requested: **Adam Stone - Smooth and Relaxed**. That is a Voice Library voice, and ElevenLabs answered HTTP 402 (free plans cannot use library voices through the API). To switch: upgrade or add $5 of credits, set `voice` in `demo/narration.json` to the requested one, then run the steps below.
+
+## Re-make the video
 ```bash
-curl -N -X POST $BASE/api/chat -H "Content-Type: application/json" \
-     -d '{"message":"Can intern-laptop reach prod-customer-db? Why?"}'
+python demo/make_narration.py --force      # voiceover clips (needs ELEVENLABS_API_KEY in .env), writes demo/audio/
+python demo/reset_live.py                  # clean demo graph (needs RESET_TOKEN in .env; never shown on screen)
+python demo/record_demo.py                 # records the live site and mixes the audio -> demo/chokepoint-demo.mp4
+python demo/verify_video.py                # one frame per segment + contact sheets for a visual check
+python demo/reset_live.py                  # leave the live graph clean for visitors
 ```
-Streams `tool_call`, `tool_result` (with the path and trace) and `final {text, checked}`.
-
-## After recording
-Reset so the next take starts clean: `curl -s -X POST $BASE/api/reset -H "X-Reset-Token: $RESET_TOKEN"`.
-Keep the narration to what the calls return; every number above is real.
+Generated media (`demo/*.mp4`, `demo/audio/`, `demo/video/`, `demo/frames/`) and the design-reference video `ui/` are git-ignored.
+The recorder writes decisions to the live graph (propose and reject), which is why the graph is reset before and after.
