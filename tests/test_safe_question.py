@@ -77,3 +77,18 @@ def test_demo_questions_have_templates_that_pass_the_checker(seeded_graph, monke
     events = asyncio.run(_collect(question, seeded_graph.name))
     result = [e for e in events if e["event"] == "tool_result"][-1]["envelope"]
     assert agent.check_answer(final(events)["text"], [result]).ok
+
+
+def test_checker_rejects_not_in_the_graph_for_an_existing_asset(seeded_graph):
+    env = tools.explain_reachability("srv-alpha-01", graph_name=seeded_graph.name)
+    assert env["outcome"] == "not_in_graph"
+    assert not agent.check_answer("srv-alpha-01 is not in the graph.", [env]).ok
+    assert agent.check_answer("There is no modelled path from srv-alpha-01 to any crown jewel.", [env]).ok
+    ghost = tools.explain_reachability("ghost-host-99", graph_name=seeded_graph.name)
+    assert agent.check_answer("ghost-host-99 is not in the graph.", [ghost]).ok   # truly unknown: allowed
+
+
+def test_model_sees_a_plain_outcome_name_for_no_path(seeded_graph):
+    env = tools.explain_reachability("srv-alpha-01", graph_name=seeded_graph.name)
+    shown = agent.compact(env)
+    assert "no_modelled_path" in shown and "not_in_graph" not in shown

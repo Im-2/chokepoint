@@ -37,7 +37,9 @@ SYSTEM_PROMPT = (
     "You cannot approve or reject changes; only humans do. "
     "For 'can X reach Y' use explain_reachability. For 'is X safe, secure or exposed' call "
     "explain_reachability with only from_name (it then checks every crown jewel) and report whether a "
-    "path is modelled; never answer yes or no about safety. Unknown names: say they are unknown. "
+    "path is modelled; never answer yes or no about safety. The outcome no_modelled_path means the asset "
+    "exists but no path is modelled; say 'no modelled path', never 'not in the graph'. "
+    "Only the outcome unknown_asset means a name does not exist. "
     "To simulate or propose 'the plan' or 'the fix', never ask the user for edge ids: first call "
     "plan_remediation, then call simulate_fix (or propose_change) with the edge_ids of that plan."
 )
@@ -114,6 +116,10 @@ def check_answer(sentence: str, envelopes: list[dict]) -> Check:
     if envelopes and re.search(r"\bno (?:modelled|modeled) (?:attack )?path", text) and not any(
             e["outcome"] == "not_in_graph" for e in envelopes):
         return Check(False, "the sentence says no path is modelled but the tools did not report that")
+
+    if re.search(r"\b(?:is|are|was|were)(?: not|n't) in (?:the )?graph\b|\bnot in (?:the )?graph\b|\bdoes(?: not|n't) exist\b", text) \
+            and not any(e["outcome"] == "unknown_asset" for e in envelopes):
+        return Check(False, "the asset exists; the graph only has no modelled path for it")
 
     if re.search(r"\bverif\w*", text) and not any(e["outcome"] == "verified_fix" for e in envelopes):
         return Check(False, "the sentence says verified but simulate_fix did not run")
@@ -312,7 +318,10 @@ class McpCaller:
 def compact(env: dict, max_chars: int = 4500) -> str:
     """What the model sees: names and numbers only, no trace, no long text, capped in size."""
     data = {k: v for k, v in env["data"].items() if k not in ("ticket_markdown", "config_diff")}
-    out = {"outcome": env["outcome"], "notes": env["notes"][:300], "data": data}
+    # The API's "not_in_graph" means "no path is modelled", but a model reads it as "the asset does not
+    # exist" (seen live), so the model is shown the plainer name.
+    outcome = "no_modelled_path" if env["outcome"] == "not_in_graph" else env["outcome"]
+    out = {"outcome": outcome, "notes": env["notes"][:300], "data": data}
     if env["paths"]:
         out["paths"] = [" > ".join(n["name"] for n in p["nodes"]) for p in env["paths"][:5]]
         out["paths_total"] = len(env["paths"])
