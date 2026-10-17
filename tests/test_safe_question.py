@@ -107,3 +107,24 @@ def test_no_modelled_path_answer_always_carries_the_not_safe_statement(seeded_gr
                   message("No modelled path; that is not a statement that srv-alpha-01 is safe."))
     again = final(run_llm(seeded_graph.name, [("primary", llm, "m")], "Is srv-alpha-01 safe?"))["text"]
     assert again.lower().count("not a statement") == 1
+
+
+def test_simulating_the_plan_uses_the_plans_edges_not_the_models(seeded_graph):
+    """Seen live: after planning, the model simulated e026 (the decoy) and e025 instead of the plan's edges."""
+    plan = tools.plan_remediation(3, graph_name=seeded_graph.name)
+    plan_ids = [s["edge_id"] for s in plan["data"]["plan"]]
+    llm = FakeLLM(message(calls=[("plan_remediation", {"budget": 3})]),
+                  message(calls=[("simulate_fix", {"edge_ids": ["e026", "e025"]})]),
+                  message("The fix is verified."))
+    events = run_llm(seeded_graph.name, [("primary", llm, "m")], "Plan a fix with budget 3 and simulate it.")
+    simulate_call = next(e for e in events if e["event"] == "tool_call" and e["tool"] == "simulate_fix")
+    assert simulate_call["args"]["edge_ids"] == plan_ids
+    result = next(e for e in events if e["event"] == "tool_result" and e["tool"] == "simulate_fix")
+    assert result["envelope"]["data"]["edge_ids"] == plan_ids
+    assert "e026" not in result["envelope"]["data"]["edge_ids"]
+
+
+def test_edges_the_user_names_are_respected(seeded_graph):
+    llm = FakeLLM(message(calls=[("simulate_fix", {"edge_ids": ["e023"]})]), message("Simulated e023."))
+    events = run_llm(seeded_graph.name, [("primary", llm, "m")], "Simulate e023")
+    assert next(e for e in events if e["event"] == "tool_call")["args"]["edge_ids"] == ["e023"]

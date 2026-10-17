@@ -364,6 +364,8 @@ async def _llm_events(client, model, message, history, mcp, results):
     tools = await mcp.list_openai_tools()
     messages = [{"role": "system", "content": SYSTEM_PROMPT}, *history, {"role": "user", "content": message}]
     calls_made = 0
+    plan_ids: list[str] = []  # edges of the plan made earlier in this turn, if any
+    user_named_edges = bool(EDGE_ID.search(message.lower()))
     while True:
         resp = await _create(client, model, messages, tools if calls_made < MAX_TOOL_CALLS else None)
         msg = resp.choices[0].message
@@ -384,6 +386,10 @@ async def _llm_events(client, model, message, history, mcp, results):
                 args = json.loads(call.function.arguments or "{}")
             except json.JSONDecodeError:
                 args = {}
+            if name in ("simulate_fix", "propose_change") and plan_ids and not user_named_edges:
+                # "simulate the plan" must simulate THE plan: a model once passed other edge ids (seen live,
+                # it picked the decoy), so the edges come from the plan_remediation result, not from the model
+                args = {**args, "edge_ids": plan_ids}
             yield ("event", {"event": "tool_call", "tool": name, "args": args})
             try:
                 env = await mcp.call(name, args)
@@ -391,6 +397,8 @@ async def _llm_events(client, model, message, history, mcp, results):
                 messages.append({"role": "tool", "tool_call_id": call.id, "content": f"error: {e}"})
                 continue
             results.append((name, env))
+            if name == "plan_remediation":
+                plan_ids = [s["edge_id"] for s in env["data"].get("plan", [])]
             yield ("event", {"event": "tool_result", "tool": name, "outcome": env["outcome"], "envelope": env})
             messages.append({"role": "tool", "tool_call_id": call.id, "content": compact(env)})
 
