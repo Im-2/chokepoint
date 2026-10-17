@@ -6,7 +6,7 @@ What it does: Playwright (Chromium, 1920x1080) drives the site with a visible cu
 narration segment it logs the start offset, performs that scene's actions while the clip plays, and holds until the
 clip ends. Every number shown is asserted against the live UI, so a wrong result aborts the run instead of being
 recorded. Nothing is mocked or edited; captions and the end card are overlays. The clips are mixed in with ffmpeg.
-Output: demo/chokepoint-demo.mp4 (git-ignored, with demo/video/ and demo/audio/).
+Output: demo/chokepoint-demo.mp4 (git-ignored, with demo/video/ and demo/audio/). Background music: scripts/make_music.py.
 """
 import argparse
 import json
@@ -58,7 +58,7 @@ OVERLAY_JS = r"""
   const ring = document.createElement('div'); ring.id = '__ring';
   const cap = document.createElement('div'); cap.id = '__cap';
   const end = document.createElement('div'); end.id = '__end';
-  end.innerHTML = '<h1>Chokepoint</h1><p>trychokepoint.vercel.app &nbsp;·&nbsp; github.com/Im-2/chokepoint</p><small>Graph Hacks · Track 01 · FalkorDB · synthetic data · AI-generated voiceover</small>';
+  end.innerHTML = '<h1>Chokepoint</h1><p>trychokepoint.vercel.app &nbsp;·&nbsp; github.com/Im-2/chokepoint</p><small>Graph Hacks · Track 01 · FalkorDB · synthetic data</small>';
   const mount = () => { document.head.append(style); document.body.append(cur, ring, cap, end); };
   if (document.body) mount(); else document.addEventListener('DOMContentLoaded', mount);
   addEventListener('mousemove', e => { cur.style.left = e.clientX - 5 + 'px'; cur.style.top = e.clientY - 3 + 'px'; }, true);
@@ -211,7 +211,6 @@ def run():
 
         # =============== s01 intro ===============
         t = R.segment("s01_intro")
-        R.caption("Voiceover is AI-generated · everything on screen is a real run on trychokepoint.vercel.app")
         R.glide(W * 0.5, H * 0.72, 3.0)
         R.end_segment("s01_intro")
 
@@ -444,21 +443,13 @@ def run():
 
 
 def mix(video: Path, trim: float, starts: dict):
-    inputs = ["-ss", f"{trim:.3f}", "-i", str(video)]
-    filters, labels = [], []
-    for i, seg in enumerate(SEGMENTS, start=1):
-        inputs += ["-i", str(ROOT / "audio" / f"{seg['id']}.mp3")]
-        delay = max(0, int(round((starts[seg["id"]] - trim) * 1000)))
-        filters.append(f"[{i}:a]adelay={delay}|{delay}[a{i}]")
-        labels.append(f"[a{i}]")
-    filters.append("".join(labels) + f"amix=inputs={len(labels)}:normalize=0:dropout_transition=0[mixed]")
-    filters.append("[mixed]loudnorm=I=-16:TP=-1.5:LRA=11[aout]")
-    cmd = ["ffmpeg", "-v", "error", "-y", *inputs, "-filter_complex", ";".join(filters), "-map", "0:v", "-map", "[aout]",
-           "-c:v", "libx264", "-preset", "medium", "-crf", "20", "-pix_fmt", "yuv420p", "-r", "25",
-           "-c:a", "aac", "-b:a", "160k", "-ar", "44100", "-movflags", "+faststart", str(OUT_MP4)]
-    subprocess.run(cmd, check=True)
-    size = OUT_MP4.stat().st_size / 1e6
-    print(f"mixed -> {OUT_MP4} ({size:.1f} MB)")
+    """Voiceover + original ambient music (ducked under the voice), normalised to -16 LUFS. See demo/mixer.py."""
+    sys.path.insert(0, str(ROOT))
+    import mixer
+    stats = mixer.build_final(video, trim, starts, SEGMENTS, DURATIONS)
+    print(f"mixed -> {OUT_MP4} ({OUT_MP4.stat().st_size / 1e6:.1f} MB)")
+    for key, value in stats.items():
+        print(f"   {key}: {value:.2f}" if isinstance(value, float) else f"   {key}: {value}")
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ Status: ✅ done · 🟡 partial / planned · ⬜ not started. Re-checked before
 | 4 | Cypher queries / algorithms list | `app/queries.py` (all Cypher) + `docs/QUERIES.md` | ✅ all current queries documented in docs/QUERIES.md |
 | 5 | Demo video | Script in `docs/DEMO_SCRIPT.md`; recorded as `demo/chokepoint-demo.mp4` (not committed); "Demo video: <link>" placeholder in the README | 🟡 recorded and verified; upload it and paste the link into the README |
 | 6 | Deployment or local setup instructions | README: FalkorDB Cloud + `docker-compose.yml` (optional local); live on Vercel | ✅ live at https://trychokepoint.vercel.app, verified; local setup documented; compose file untested and marked so |
-| 7 | AI-assistance disclosure | README section; `docs/WALKTHROUGH.md` shows the human can explain the design | ✅ README section "AI-assistance disclosure"; study guide docs/WALKTHROUGH.md |
+| 7 | AI-assistance disclosure | README section; `docs/WALKTHROUGH.md` shows the human can explain the design; `docs/SUBMISSION.md` carries the one-sentence disclosure for the submission page and video upload | ✅ README section "AI-assistance disclosure"; study guide docs/WALKTHROUGH.md |
 | 8 | Track 01 named | README top section | ✅ README section "AI-assistance disclosure"; study guide docs/WALKTHROUGH.md |
 | 9 | Public repo, no secrets | `.gitignore` excludes `.env`; only `.env.example` committed; secret scan before each commit | ✅ public repo https://github.com/Im-2/chokepoint; history scrubbed and scanned |
 | 10 | Work created during the event | Repo started during the event; single history in git | ✅ public repo https://github.com/Im-2/chokepoint; history scrubbed and scanned |
