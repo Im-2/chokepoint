@@ -35,7 +35,9 @@ SYSTEM_PROMPT = (
     "No path means 'no modelled path', never that something is safe. "
     "Say a fix is verified only if simulate_fix ran. "
     "You cannot approve or reject changes; only humans do. "
-    "For 'can X reach Y' use explain_reachability. Unknown names: say they are unknown."
+    "For 'can X reach Y' use explain_reachability. Unknown names: say they are unknown. "
+    "To simulate or propose 'the plan' or 'the fix', never ask the user for edge ids: first call "
+    "plan_remediation, then call simulate_fix (or propose_change) with the edge_ids of that plan."
 )
 
 
@@ -101,6 +103,11 @@ def check_answer(sentence: str, envelopes: list[dict]) -> Check:
     if envelopes and all(e["outcome"] in ("not_in_graph", "unknown_asset") for e in envelopes):
         if re.search(r"\b(cut|cuts|reduc\w*|eliminat\w*|fix(?:ed|es)?|block\w*|prevent\w*|mitigat\w*)\b", text):
             return Check(False, "the sentence claims an impact but the tools found no paths")
+
+    if any(e["outcome"] == "not_in_graph" for e in envelopes) and re.search(
+            r"\b(cannot|can't|can not|unable to|unreachable|impossible|not reachable|isn't reachable|"
+            r"no way to|no access)\b", text):
+        return Check(False, "'no modelled path' does not mean the asset cannot reach it")
 
     if re.search(r"\bverif\w*", text) and not any(e["outcome"] == "verified_fix" for e in envelopes):
         return Check(False, "the sentence says verified but simulate_fix did not run")
@@ -414,6 +421,8 @@ async def _run_chat(message, history, graph_name, llm_clients):
                 continue
             if text is None:
                 continue
+            if not results and parse_request(message)["kind"] != "help":
+                break  # the model skipped the tools for a request we recognise: the router answers
             envelopes = [env for _, env in results]
             verdict = check_answer(text, envelopes) if text.strip() else Check(False, "empty answer")
             if verdict.ok:

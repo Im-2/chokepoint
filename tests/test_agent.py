@@ -229,7 +229,7 @@ def test_llm_sentence_with_an_invented_name_is_replaced_by_the_template(seeded_g
 def test_llm_cannot_record_a_decision(fresh_graph_name):
     llm = FakeLLM(message(calls=[("record_decision", {"decision_id": "d-hist-1", "action": "approve"})]),
                   message("Done."))
-    events = run_llm(fresh_graph_name, [("primary", llm, "fake-model")])
+    events = run_llm(fresh_graph_name, [("primary", llm, "fake-model")], "please approve d-hist-1")
     assert not [e for e in events if e["event"] == "tool_call"]          # never even attempted
     recall = tools.recall_decisions(graph_name=fresh_graph_name)
     assert {d["status"] for d in recall["data"]["decisions"]} == {"rejected", "approved"}  # unchanged
@@ -273,3 +273,42 @@ def test_abandoning_the_stream_cleans_up_without_errors(seeded_graph, monkeypatc
         await asyncio.sleep(0.2)
         return first
     assert asyncio.run(go())["event"] == "tool_call"
+
+
+def test_system_prompt_tells_the_model_to_plan_before_simulating():
+    assert "never ask the user for edge ids" in agent.SYSTEM_PROMPT
+    assert "first call plan_remediation, then call simulate_fix" in agent.SYSTEM_PROMPT
+
+
+def test_model_plans_then_simulates_when_it_follows_the_instruction(seeded_graph):
+    # the edge ids the model passes to simulate_fix come from the plan_remediation result
+    plan = tools.plan_remediation(3, graph_name=seeded_graph.name)
+    ids = [s["edge_id"] for s in plan["data"]["plan"]]
+    llm = FakeLLM(message(calls=[("plan_remediation", {"budget": 3})]),
+                  message(calls=[("simulate_fix", {"edge_ids": ids})]),
+                  message("The simulation shows 19 paths before and 0 after removing e023 and e022."))
+    events = run_llm(seeded_graph.name, [("primary", llm, "m")], "simulate the plan")
+    assert [e["tool"] for e in events if e["event"] == "tool_call"] == ["plan_remediation", "simulate_fix"]
+    assert final(events)["checked"] is True and final(events)["mode"] == "llm-primary"
+
+
+def test_model_that_skips_the_tools_is_overruled_by_the_router(seeded_graph):
+    """The bug seen with the real model: 'Edge IDs are required' instead of planning first."""
+    llm = FakeLLM(message("Edge IDs are required to simulate the fix."))
+    events = run_llm(seeded_graph.name, [("primary", llm, "m")], "Simulate the plan and tell me whether the fix is verified")
+    assert [e["tool"] for e in events if e["event"] == "tool_call"] == ["plan_remediation", "simulate_fix"]
+    assert final(events)["mode"] == "router" and "19 attack paths before, 0 after" in final(events)["text"]
+
+
+def test_small_talk_without_tools_is_left_alone(seeded_graph):
+    llm = FakeLLM(message("Hello! Ask me about attack paths."))
+    events = run_llm(seeded_graph.name, [("primary", llm, "m")], "hello")
+    assert final(events)["mode"] == "llm-primary" and final(events)["checked"] is True
+
+
+def test_checker_rejects_cannot_reach_when_the_graph_only_says_not_modelled(seeded_graph):
+    env = envelope("explain_reachability", seeded_graph.name, from_name="srv-alpha-01", to_name="prod-customer-db")
+    assert env["outcome"] == "not_in_graph"
+    assert not agent.check_answer("srv-alpha-01 cannot reach prod-customer-db.", [env]).ok
+    assert not agent.check_answer("prod-customer-db is unreachable from srv-alpha-01.", [env]).ok
+    assert agent.check_answer("There is no modelled path from srv-alpha-01 to prod-customer-db.", [env]).ok
