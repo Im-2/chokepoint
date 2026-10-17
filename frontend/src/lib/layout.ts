@@ -6,8 +6,8 @@ export interface Layout {
   relevant: Set<string>;
 }
 
-const COLUMN_GAP = 230;
-const ROW_GAP = 74;
+const COLUMN_GAP = 165;
+const ROW_GAP = 88;
 const KIND_ORDER = ["user", "secret", "host", "group", "service_account", "role", "datastore", "vault"];
 
 function reach(start: Iterable<string>, adjacency: Map<string, string[]>): Set<string> {

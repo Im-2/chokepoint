@@ -54,3 +54,32 @@ describe("format helpers", () => {
     expect(blocks.map((b) => b.type)).toEqual(["heading", "paragraph", "table"]);
   });
 });
+
+import { effectiveView } from "./graphView";
+import type { AttackPath } from "../types";
+
+const path = (...edgeIds: string[]): AttackPath => ({
+  nodes: [], edges: edgeIds.map((id) => ({ id, kind: "network" })),
+});
+
+describe("effectiveView (before/after toggle)", () => {
+  const baseline = [path("e1", "e2"), path("e3", "e2"), path("e4", "e5")];
+  const view = { source: "sim" as const, paths: [path("e4", "e5")], planEdges: [], cutEdges: ["e2"], selected: null, simSide: "after" as const };
+
+  it("after: shows remaining paths, cut edges, and the paths the fix removed as ghosts", () => {
+    const v = effectiveView(view, baseline);
+    expect(v.paths).toHaveLength(1);
+    expect(v.cutEdges).toEqual(["e2"]);
+    expect(v.ghostPaths).toHaveLength(2);
+  });
+  it("before: shows every original path and previews the edges to be cut", () => {
+    const v = effectiveView({ ...view, simSide: "before" }, baseline);
+    expect(v.paths).toHaveLength(3);
+    expect(v.cutEdges).toEqual([]);
+    expect(v.planEdges).toEqual(["e2"]);
+  });
+  it("a selected path narrows the highlight to that path", () => {
+    const v = effectiveView({ ...view, source: "scan", paths: baseline, cutEdges: [], selected: 1 }, baseline);
+    expect(v.paths).toEqual([baseline[1]]);
+  });
+});

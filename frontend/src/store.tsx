@@ -9,14 +9,14 @@ import type {
 export interface Async<T> { status: "idle" | "loading" | "ok" | "error"; data: T | null; error: string | null }
 const idle = <T,>(): Async<T> => ({ status: "idle", data: null, error: null });
 
-type ScanEnv = Envelope<{ depth: number; count: number; shortest_hops: number; truncated: boolean }>;
-type ReachEnv = Envelope<{ from: string; to: string; hops: number; attacker_cost: number; unknown?: string[] }>;
-type ChokeEnv = Envelope<{ depth: number; total_paths: number; ranked: ChokeRow[]; naive_most_paths: ChokeRow }>;
-type PlanEnv = Envelope<PlanData>;
-type SimEnv = Envelope<SimulationData>;
-type ProposalEnv = Envelope<ProposalData>;
-type DecideEnv = Envelope<{ status: string; reason: string; decided: { decision_id: string; edge_id: string }[] }>;
-type DecisionsEnv = Envelope<{ decisions: DecisionRecord[] }>;
+export type ScanEnv = Envelope<{ depth: number; count: number; shortest_hops: number; truncated: boolean }>;
+export type ReachEnv = Envelope<{ from: string; to: string; hops: number; attacker_cost: number; unknown?: string[] }>;
+export type ChokeEnv = Envelope<{ depth: number; total_paths: number; ranked: ChokeRow[]; naive_most_paths: ChokeRow }>;
+export type PlanEnv = Envelope<PlanData>;
+export type SimEnv = Envelope<SimulationData>;
+export type ProposalEnv = Envelope<ProposalData>;
+export type DecideEnv = Envelope<{ status: string; reason: string; decided: { decision_id: string; edge_id: string }[] }>;
+export type DecisionsEnv = Envelope<{ decisions: DecisionRecord[] }>;
 
 /** What the graph canvas should show. */
 export interface View {
