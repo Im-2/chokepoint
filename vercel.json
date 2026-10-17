@@ -1,7 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "regions": ["dub1"],
-  "buildCommand": "cd frontend && npm ci && npm run build",
   "functions": {
     "app/main.py": {
       "maxDuration": 60,

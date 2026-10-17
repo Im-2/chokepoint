@@ -202,7 +202,7 @@ python -m pytest                                    # 69 tests; they only touch 
 cd frontend && npm ci
 npm run dev          # http://localhost:5173, proxies /api to the deployed backend (set CHOKEPOINT_BACKEND to use another)
 npm test             # unit tests: layout, SSE parser, before/after logic, formatting
-npm run build        # type-checks, then writes the site to ../public (served by Vercel)
+npm run build        # type-checks, then writes the site to ../public (committed; Vercel serves it from its CDN)
 npm run e2e -- http://localhost:5173 shots [--safe]   # real-browser walkthrough; --safe skips steps that write
 ```
 
@@ -232,8 +232,9 @@ Deployed on **Vercel** (FastAPI preset, Python 3.12, single function) with **Fal
 database: https://chokepoint-alpha.vercel.app
 
 - `app/main.py` exposes the ASGI `app` (Vercel's FastAPI preset finds it; `api/index.py` re-exports
-  it). The frontend is built on Vercel by the `buildCommand` in `vercel.json` (`cd frontend && npm ci && npm run build`)
-  into `public/`, which Vercel serves from its CDN at `/`; `public/` is not committed. `vercel.json` pins the function to `dub1` (Dublin) because the database runs in AWS eu-west-1:
+  it). The website is the committed build output in `public/` (made by `npm run build` in `frontend/`), which Vercel
+  serves from its CDN at `/`. After a UI change: `cd frontend && npm run build`, commit `public/`, then `vercel deploy --prod`.
+  (Files that a Vercel build command generates into `public/` are not picked up, which is why the build is committed.) `vercel.json` pins the function to `dub1` (Dublin) because the database runs in AWS eu-west-1:
   a query takes about 2 ms server-side there, against about 150 ms from far away.
 - Stateless: no disk, no background threads, MCP over stateless HTTP; the FastAPI lifespan starts the
   MCP session manager.
@@ -271,7 +272,7 @@ This project was built with **Claude Code** as a coding assistant, under the dev
 ## Repository layout
 
 ```
-frontend/   Vite + React + TypeScript site (landing + console); builds to public/
+frontend/   Vite + React + TypeScript site (landing + console); build output goes to public/ (committed)
 app/        main.py (FastAPI) · tools.py · queries.py · planner.py · seed.py · agent.py · mcp_server.py · models.py · db.py · config.py
 api/        index.py (Vercel entry point)
 tests/      69 pytest tests against a real FalkorDB (graphs named test:*)

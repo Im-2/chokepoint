@@ -22,7 +22,7 @@
   --fix-glow: rgba(61, 219, 192, 0.3);
   --warn: #e8c46a;
   --serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
-  --sans: "Inter Variable", Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sans: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --radius: 14px;

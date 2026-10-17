@@ -13,7 +13,7 @@ const SHAPES: Record<string, string> = {
 const STYLE: StylesheetJson = [
   { selector: "node", style: {
     width: 30, height: 30, "background-color": "#2a2a2a", "border-width": 1.5, "border-color": "#6b6b6b",
-    label: "data(label)", "font-family": "Inter Variable, Inter, system-ui, sans-serif", "font-size": 13, color: "#cfcfcf",
+    label: "data(label)", "font-family": "Inter, system-ui, sans-serif", "font-size": 13, color: "#cfcfcf",
     "text-valign": "bottom", "text-margin-y": 6, "text-outline-color": "#050505", "text-outline-width": 2,
     "min-zoomed-font-size": 6, shape: "ellipse" } },
   ...Object.entries(SHAPES).map(([kind, shape]) => ({ selector: `node[kind = "${kind}"]`, style: { shape } as any })),

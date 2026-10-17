@@ -6,8 +6,9 @@ const BACKEND = process.env.CHOKEPOINT_BACKEND ?? "https://chokepoint-alpha.verc
 
 export default defineConfig({
   plugins: [react()],
-  // Vercel serves anything in the repo's public/ folder from its CDN at the site root,
-  // next to the FastAPI function that serves /api, /mcp, /docs and /healthz.
+  // The build goes to the repo's public/ folder, which is committed: Vercel serves public/ from its CDN at
+  // the site root, next to the FastAPI function that serves /api, /mcp, /docs and /healthz. (Files that a
+  // build command generates there are NOT picked up, so the build is done locally and committed.)
   build: { outDir: "../public", emptyOutDir: true, sourcemap: false, target: "es2022" },
   server: {
     proxy: {
