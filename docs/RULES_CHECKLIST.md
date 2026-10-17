@@ -9,7 +9,7 @@ Status: ✅ done · 🟡 partial / planned · ⬜ not started. Re-checked before
 | 3 | README with setup + graph data model | `README.md` (data model, setup, Cloud and Docker options) | ✅ README has setup and the graph data model |
 | 4 | Cypher queries / algorithms list | `app/queries.py` (all Cypher) + `docs/QUERIES.md` | ✅ all current queries documented in docs/QUERIES.md |
 | 5 | Demo video | Script in `docs/DEMO_SCRIPT.md`; video link in README | 🟡 script ready (docs/DEMO_SCRIPT.md); the video itself is for the developer to record, link goes in the README |
-| 6 | Deployment or local setup instructions | README: FalkorDB Cloud + `docker-compose.yml` (optional local); live on Vercel | ✅ live at https://chokepoint-alpha.vercel.app, verified; local setup documented; compose file untested and marked so |
+| 6 | Deployment or local setup instructions | README: FalkorDB Cloud + `docker-compose.yml` (optional local); live on Vercel | ✅ live at https://trychokepoint.vercel.app, verified; local setup documented; compose file untested and marked so |
 | 7 | AI-assistance disclosure | README section; `docs/WALKTHROUGH.md` shows the human can explain the design | ✅ README section "AI-assistance disclosure"; study guide docs/WALKTHROUGH.md |
 | 8 | Track 01 named | README top section | ✅ README section "AI-assistance disclosure"; study guide docs/WALKTHROUGH.md |
 | 9 | Public repo, no secrets | `.gitignore` excludes `.env`; only `.env.example` committed; secret scan before each commit | ✅ public repo https://github.com/Im-2/chokepoint; history scrubbed and scanned |
@@ -33,14 +33,14 @@ the real `.env` values); local setup instructions; `.env` never committed.
 
 Still missing or open (be honest in the submission):
 - **Demo video:** not recorded (the developer records it; script is ready). Add the link to the README.
-- **Live deployment:** done in Phase 8 (https://chokepoint-alpha.vercel.app). Keep it working until judging.
+- **Live deployment:** done in Phase 8 (https://trychokepoint.vercel.app). Keep it working until judging.
 - **Frontend:** built (Phase 7) and deployed with the API; verified in a real browser, locally and on the live URL.
 - **Untested:** `docker-compose.yml` (no Docker on the dev machine) and the Gemini fallback settings.
 - **Not done on purpose:** authentication on write tools other than `/api/reset`.
 
 ## Frontend and deployment (Phases 7 and 8)
 - `frontend/` consumes only the REST contract (section 8 of the brief); no `/api/reset` button, no Cypher.
-- Same Vercel project as the API: https://chokepoint-alpha.vercel.app (site at `/`, API unchanged).
+- Same Vercel project as the API: https://trychokepoint.vercel.app (site at `/`, API unchanged).
 - Verified: 11 unit tests, type-check, and a real-browser walkthrough (33 checks locally, 26 in safe mode on the live URL).
 - The design-reference video (`ui/`) is git-ignored and was never committed; no brand, imagery or copy was taken from it (see docs/UI_SPEC.md).
 - Still open: the demo video (to record) and the untested Docker compose / Gemini fallback.

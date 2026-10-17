@@ -2,7 +2,7 @@ import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 
 // In dev, the API is the deployed backend so no local FalkorDB is needed.
-const BACKEND = process.env.CHOKEPOINT_BACKEND ?? "https://chokepoint-alpha.vercel.app";
+const BACKEND = process.env.CHOKEPOINT_BACKEND ?? "https://trychokepoint.vercel.app";
 
 export default defineConfig({
   plugins: [react()],

@@ -56,6 +56,8 @@ def choke_edge_frequency(depth: int) -> str:
 
 
 # Shortest path by attacker cost, via FalkorDB's algo.SPpaths. Parameters: $from, $to.
+CROWN_JEWELS = "MATCH (a:Asset {crown:true}) RETURN a.name AS name ORDER BY name"
+
 SHORTEST_PATH = (
     "MATCH (a:Asset {name:$from}), (b:Asset {name:$to}) "
     "CALL algo.SPpaths({sourceNode:a, targetNode:b, relTypes:['PIVOT'], relDirection:'outgoing', "

@@ -182,7 +182,7 @@ try {
   // ---------- chat ----------
   await page.click(".dock-toggle");
   await page.waitForSelector(".dock");
-  await clickText("Can intern-laptop reach prod-customer-db? Why?");
+  await clickText("Can intern-laptop reach prod-customer-db?");
   await waitFor(() => document.querySelector(".msg--assistant .msg__text") && !document.querySelector(".typing"), "chat answer", 60000);
   const answer = (await text(".msg--assistant .msg__text")).replace(/[‐-―]/g, "-"); // models sometimes write non-breaking hyphens
   check("chat answers with the path", answer.includes("grp-platform-eng"), answer.slice(0, 70));

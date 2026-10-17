@@ -23,6 +23,7 @@ parameters, so a model or user cannot inject Cypher through them (tested in `tes
 | `choke_edge_frequency(depth)` | Runs the same search, `UNWIND`s each path into its edges and counts `DISTINCT` paths per edge (`paths_through`), with disruption, fix text and end points. | rank_choke_edges, plan_remediation |
 | `SHORTEST_PATH` | `algo.SPpaths` weighted by the edge `cost` property: the cheapest route for an attacker between two named assets. | explain_reachability |
 | `LOAD_BEARING` | `algo.betweenness` over `PIVOT`; sampling size above the node count and a fixed seed make it repeatable. | rank_load_bearing_assets |
+| `CROWN_JEWELS` | Names of every crown jewel (`crown:true`), so a question about one asset can be checked against all of them. | explain_reachability (without `to_name`) |
 | `EXISTING_EDGES` | Which of these edge ids exist? | simulate_fix |
 | `EDGE_DETAILS` | One edge with its end points and the **owner team of the destination asset** (found by traversing `OWNS`). | propose_change |
 | `REJECTED_EDGES` | Edge ids humans rejected, with reasons. This is the planner's memory. | plan_remediation |

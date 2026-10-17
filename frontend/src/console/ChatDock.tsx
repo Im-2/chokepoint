@@ -11,10 +11,10 @@ interface Msg {
 }
 
 const SUGGESTED = [
+  "Can intern-laptop reach prod-customer-db?",
+  "Plan a fix with budget 3 and simulate it.",
+  "Is srv-alpha-01 safe?",
   "Scan at depth 4",
-  "Can intern-laptop reach prod-customer-db? Why?",
-  "Plan a fix",
-  "Simulate the plan and tell me whether the fix is verified",
   "What did we decide before?",
 ];
 

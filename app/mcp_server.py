@@ -26,7 +26,7 @@ def build_server(graph_name: str | None = None) -> MCPServer:
         return tools.find_attack_paths(depth, limit, graph_name=g)
 
     @mcp.tool(description=describe("explain_reachability"))
-    def explain_reachability(from_name: str, to_name: str) -> dict[str, Any]:
+    def explain_reachability(from_name: str, to_name: str | None = None) -> dict[str, Any]:
         return tools.explain_reachability(from_name, to_name, graph_name=g)
 
     @mcp.tool(description=describe("rank_choke_edges"))

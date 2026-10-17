@@ -8,7 +8,7 @@ Each step is one API call. When the frontend exists, each step is one button; th
 graph freshly reset:
 
 ```bash
-BASE=https://chokepoint-alpha.vercel.app      # or http://127.0.0.1:8000 for a local server
+BASE=https://trychokepoint.vercel.app      # or http://127.0.0.1:8000 for a local server
 curl -s -X POST $BASE/api/reset -H "X-Reset-Token: $RESET_TOKEN"     # 130 assets, 322 PIVOT edges
 ```
 
@@ -37,7 +37,7 @@ Optional for a clean take: `python -m scripts.demo_run` runs the whole story bel
 scratch-graph simulation and decision memory. Take it away and none of this exists."
 
 ## Recording it in the console (same story, same numbers)
-Open https://chokepoint-alpha.vercel.app and press **Launch console**. Each step is a button; the right panels and the graph update.
+Open https://trychokepoint.vercel.app and press **Launch console**. Each step is a button; the right panels and the graph update.
 
 | Story step | In the console |
 |---|---|

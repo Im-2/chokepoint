@@ -7,7 +7,7 @@ Built for **Graph Hacks: Context for AI Agents (WeMakeDevs x FalkorDB), Track 01
 | | |
 |---|---|
 | Repo | https://github.com/Im-2/chokepoint |
-| Live deployment | **https://chokepoint-alpha.vercel.app**: landing page and console at `/`, API docs at [/docs](https://chokepoint-alpha.vercel.app/docs), MCP at `/mcp`. Vercel + FalkorDB Cloud. |
+| Live deployment | **https://trychokepoint.vercel.app**: landing page and console at `/`, API docs at [/docs](https://trychokepoint.vercel.app/docs), MCP at `/mcp`. Vercel + FalkorDB Cloud. |
 | Demo video | _To be added._ Script: [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) |
 | Study guide | [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md) (design decisions + judge Q&A) |
 
@@ -165,7 +165,7 @@ Simulation uses `GRAPH.COPY` (`graph.copy("sim:<uuid>")`), `MATCH ()-[r:PIVOT {i
 | Tool | Arguments | What it does |
 |---|---|---|
 | `find_attack_paths` | `depth<=8`, `limit<=50` | Enumerate entry-to-crown paths |
-| `explain_reachability` | `from_name`, `to_name` | Cheapest path via `algo.SPpaths`, or "not in graph" |
+| `explain_reachability` | `from_name`, `to_name?` | Cheapest path via `algo.SPpaths`, or "not in graph". Without `to_name` it checks every crown jewel: this is how "is X safe?" is answered (a path, or "no modelled path", never yes or no) |
 | `rank_choke_edges` | `depth<=8`, `limit<=15` | Edges ranked by paths cut per disruption (also shows the naive ranking) |
 | `rank_load_bearing_assets` | `limit<=20` | Betweenness centrality, flagged if on an attack path |
 | `plan_remediation` | `budget<=3` | Greedy set cover; skips edges humans rejected; stops when nothing is left to cut |
@@ -229,7 +229,7 @@ Try it: `python -m scripts.chat_run "Can intern-laptop reach prod-customer-db? W
 ### Deployment (live)
 
 Deployed on **Vercel** (FastAPI preset, Python 3.12, single function) with **FalkorDB Cloud** as the
-database: https://chokepoint-alpha.vercel.app
+database: https://trychokepoint.vercel.app
 
 - `app/main.py` exposes the ASGI `app` (Vercel's FastAPI preset finds it; `api/index.py` re-exports
   it). The website is the committed build output in `public/` (made by `npm run build` in `frontend/`), which Vercel

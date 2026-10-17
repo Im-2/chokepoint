@@ -18,3 +18,10 @@ frontend/node_modules/
 frontend/dist/
 
 frontend/shots/
+
+# Demo video outputs (recording script and narration text are committed; media is not)
+demo/*.mp4
+demo/audio/
+demo/video/
+demo/frames/
+demo/*.log

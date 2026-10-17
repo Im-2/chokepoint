@@ -35,7 +35,9 @@ SYSTEM_PROMPT = (
     "No path means 'no modelled path', never that something is safe. "
     "Say a fix is verified only if simulate_fix ran. "
     "You cannot approve or reject changes; only humans do. "
-    "For 'can X reach Y' use explain_reachability. Unknown names: say they are unknown. "
+    "For 'can X reach Y' use explain_reachability. For 'is X safe, secure or exposed' call "
+    "explain_reachability with only from_name (it then checks every crown jewel) and report whether a "
+    "path is modelled; never answer yes or no about safety. Unknown names: say they are unknown. "
     "To simulate or propose 'the plan' or 'the fix', never ask the user for edge ids: first call "
     "plan_remediation, then call simulate_fix (or propose_change) with the edge_ids of that plan."
 )
@@ -108,6 +110,10 @@ def check_answer(sentence: str, envelopes: list[dict]) -> Check:
             r"\b(cannot|can't|can not|unable to|unreachable|impossible|not reachable|isn't reachable|"
             r"no way to|no access)\b", text):
         return Check(False, "'no modelled path' does not mean the asset cannot reach it")
+
+    if envelopes and re.search(r"\bno (?:modelled|modeled) (?:attack )?path", text) and not any(
+            e["outcome"] == "not_in_graph" for e in envelopes):
+        return Check(False, "the sentence says no path is modelled but the tools did not report that")
 
     if re.search(r"\bverif\w*", text) and not any(e["outcome"] == "verified_fix" for e in envelopes):
         return Check(False, "the sentence says verified but simulate_fix did not run")
@@ -185,6 +191,8 @@ def parse_request(message: str) -> dict:
         return {"kind": "refuse_decision"}
     if len(names) >= 2 and re.search(r"reach|access|get to|path|why|from", m):
         return {"kind": "reach", "from_name": names[0], "to_name": names[1]}
+    if len(names) == 1 and re.search(r"\b(safe|secure|exposed|exposure|risk\w*|vulnerable|compromis\w*|dangerous)\b", m):
+        return {"kind": "exposure", "from_name": names[0]}
     if re.search(r"histor|decid|decision|memory|remember|rejected before|past|previous", m):
         return {"kind": "recall", "asset_name": names[0] if names else None}
     if re.search(r"simulat|prove|verify|what if|test the fix", m):
@@ -226,6 +234,7 @@ async def router_events(message, mcp):
         return
 
     calls = {"reach": ("explain_reachability", {"from_name": req.get("from_name"), "to_name": req.get("to_name")}),
+             "exposure": ("explain_reachability", {"from_name": req.get("from_name")}),
              "recall": ("recall_decisions", {"asset_name": req.get("asset_name")}),
              "plan": ("plan_remediation", {"budget": req.get("budget")}),
              "choke": ("rank_choke_edges", {}),
@@ -421,8 +430,11 @@ async def _run_chat(message, history, graph_name, llm_clients):
                 continue
             if text is None:
                 continue
-            if not results and parse_request(message)["kind"] != "help":
+            kind = parse_request(message)["kind"]
+            if not results and kind != "help":
                 break  # the model skipped the tools for a request we recognise: the router answers
+            if kind == "exposure" and not any(tool == "explain_reachability" for tool, _ in results):
+                break  # "is X safe?" needs the reachability check; a different tool would answer another question
             envelopes = [env for _, env in results]
             verdict = check_answer(text, envelopes) if text.strip() else Check(False, "empty answer")
             if verdict.ok:

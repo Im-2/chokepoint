@@ -120,21 +120,36 @@ def find_attack_paths(depth: int = 8, limit: int = 50, graph_name: str | None = 
     return run.envelope("answered_with_path", data, _path_dicts(rows))
 
 
-def explain_reachability(from_name: str, to_name: str, graph_name: str | None = None) -> dict:
-    """Cheapest (lowest attacker cost) path between two named assets, using algo.SPpaths."""
-    from_name, to_name = _name("from_name", from_name), _name("to_name", to_name)
+def explain_reachability(from_name: str, to_name: str | None = None, graph_name: str | None = None) -> dict:
+    """Cheapest (lowest attacker cost) path from one asset to another, using algo.SPpaths.
+    With no to_name it checks every crown jewel: this is how "is X safe?" is answered, honestly
+    (a path, or "no modelled path", never a yes or no about safety)."""
+    from_name = _name("from_name", from_name)
+    if to_name is not None:
+        to_name = _name("to_name", to_name)
     run = Run("explain_reachability", graph_name)
-    _, unknown = _resolve(run, [from_name, to_name])
+    _, unknown = _resolve(run, [from_name] + ([to_name] if to_name else []))
     if unknown:
         return _unknown_asset(run, unknown)
-    rows = run.read("shortest_path", queries.SHORTEST_PATH, {"from": from_name, "to": to_name})
-    if not rows:
-        return run.envelope("not_in_graph", {"from": from_name, "to": to_name},
-                            notes=f"No modelled path from {from_name} to {to_name}. {NOT_MODELLED}")
-    nodes, edges, weight = rows[0]
-    return run.envelope("answered_with_path",
-                        {"from": from_name, "to": to_name, "hops": len(edges), "attacker_cost": weight},
-                        [{"nodes": nodes, "edges": edges}])
+
+    if to_name is None:
+        targets = [r[0] for r in run.read("crown_jewels", queries.CROWN_JEWELS) if r[0] != from_name]
+    else:
+        targets = [to_name]
+    found = []  # (target, nodes, edges, attacker cost)
+    for target in targets:
+        rows = run.read("shortest_path", queries.SHORTEST_PATH, {"from": from_name, "to": target})
+        if rows:
+            found.append((target, *rows[0]))
+
+    if not found:
+        where = to_name or f"any crown jewel ({', '.join(targets)})"
+        return run.envelope("not_in_graph", {"from": from_name, "to": to_name, "crown_jewels": targets},
+                            notes=f"No modelled path from {from_name} to {where}. {NOT_MODELLED}")
+    cheapest = min(found, key=lambda f: (f[3], f[0]))
+    data = {"from": from_name, "to": ", ".join(f[0] for f in found), "hops": len(cheapest[2]),
+            "attacker_cost": cheapest[3]}
+    return run.envelope("answered_with_path", data, [{"nodes": f[1], "edges": f[2]} for f in found])
 
 
 def rank_choke_edges(depth: int = 8, limit: int = 15, graph_name: str | None = None) -> dict:
@@ -329,7 +344,7 @@ def recall_decisions(asset_name: str | None = None, graph_name: str | None = Non
 # Name -> (function, description). The MCP server and the router read this one registry.
 TOOLS = {
     "find_attack_paths": (find_attack_paths, "Enumerate attack paths from entry points to crown jewels up to a depth (max 8)."),
-    "explain_reachability": (explain_reachability, "Cheapest path between two named assets, or 'not in graph'."),
+    "explain_reachability": (explain_reachability, "Cheapest path from an asset to another asset, or to every crown jewel if to_name is omitted; or 'not in graph'."),
     "rank_choke_edges": (rank_choke_edges, "Rank edges by attack paths cut per unit of business disruption."),
     "rank_load_bearing_assets": (rank_load_bearing_assets, "Rank assets by betweenness centrality."),
     "plan_remediation": (plan_remediation, "Choose up to 3 edges to remove (greedy), skipping edges humans rejected before."),
