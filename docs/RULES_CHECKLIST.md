@@ -25,7 +25,7 @@ Status: ✅ done · 🟡 partial / planned · ⬜ not started. Re-checked before
 2. Tests pass.
 3. No row above has regressed.
 
-## Audit after Phase 6 (2026-10-17)
+## Audit after Phase 6 (2026-10-17; frontend and deployment added afterwards)
 Met: FalkorDB is essential (README table); synthetic data only; README with setup and graph data
 model; Cypher/algorithms list (README + docs/QUERIES.md); AI disclosure; Track 01 named; public repo
 with MIT license; history scrubbed and scanned clean (a fresh clone of the remote was scanned against
@@ -34,6 +34,13 @@ the real `.env` values); local setup instructions; `.env` never committed.
 Still missing or open (be honest in the submission):
 - **Demo video:** not recorded (the developer records it; script is ready). Add the link to the README.
 - **Live deployment:** done in Phase 8 (https://chokepoint-alpha.vercel.app). Keep it working until judging.
-- **Frontend:** not built (Phase 7, waits for the developer's design). `/docs` is the only UI.
+- **Frontend:** built (Phase 7) and deployed with the API; verified in a real browser, locally and on the live URL.
 - **Untested:** `docker-compose.yml` (no Docker on the dev machine) and the Gemini fallback settings.
 - **Not done on purpose:** authentication on write tools other than `/api/reset`.
+
+## Frontend and deployment (Phases 7 and 8)
+- `frontend/` consumes only the REST contract (section 8 of the brief); no `/api/reset` button, no Cypher.
+- Same Vercel project as the API: https://chokepoint-alpha.vercel.app (site at `/`, API unchanged).
+- Verified: 11 unit tests, type-check, and a real-browser walkthrough (33 checks locally, 26 in safe mode on the live URL).
+- The design-reference video (`ui/`) is git-ignored and was never committed; no brand, imagery or copy was taken from it (see docs/UI_SPEC.md).
+- Still open: the demo video (to record) and the untested Docker compose / Gemini fallback.

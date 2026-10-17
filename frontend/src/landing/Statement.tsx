@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { m, useReducedMotion, useScroll, useTransform, type MotionValue } from "framer-motion";
 
 const TEXT =
-  "Chokepoint traces every route from the internet to your crown-jewel data, chooses the fix that " +
+  "Chokepoint traces every route from the internet to your most valuable data, chooses the fix that " +
   "disrupts the business least, and proves it on a copy of the graph, so a human can approve a change " +
   "they can trust.";
 

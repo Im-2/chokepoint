@@ -17,3 +17,5 @@ ui/
 frontend/node_modules/
 public/
 frontend/dist/
+
+frontend/shots/

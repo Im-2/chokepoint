@@ -138,3 +138,11 @@ labels 11 px uppercase with 0.08em tracking. Italic emphasis is a style swap ins
   styles), Inter and one mono, loaded with `font-display: swap`; Framer Motion loaded for the landing
   section only where possible.
 - **Not copied:** the brand, wordmark, hand/statue/mountain imagery, client logos, portraits, copy and layout of the original page.
+
+## 9. As built (differences and decisions)
+- Fonts are self-hosted through `@fontsource` (Instrument Serif regular + italic, Inter variable, JetBrains Mono): no external font requests.
+- Scroll-linked effects use Framer Motion (`useScroll` / `useTransform`): hero shrink, word-by-word statement brightening, step cards swinging in with a 3D rotation. The lightweight `m` components need `LazyMotion` to render motion values, so the features load as a small async chunk.
+- No smooth-scroll library: the reference's inertia was not needed; `scroll-behavior: smooth` is used for anchors, and everything is switched off under `prefers-reduced-motion`.
+- The console and its graph library are a separate chunk, fetched shortly before the console scrolls into view; the first load carries only the landing section (about 100 KB of gzipped JavaScript).
+- Colour semantics as specified: red for attack paths, entry points and the decoy; teal for fixes, cut edges and verified or approved states.
+- Imagery is generated: a CSS gradient and a small SVG node-link drawing. Nothing from the video is used.

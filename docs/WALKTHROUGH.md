@@ -93,6 +93,19 @@ Tool results are compacted before the model sees them (names and numbers, no tra
 characters), the system prompt is short, and tool descriptions are trimmed, because free tiers allow
 only about 6,000 tokens a minute. Full detail goes to the HTTP response (the frontend), not the model.
 
+### The frontend only uses the REST contract
+`frontend/` is a Vite + React + TypeScript page with Framer Motion (landing animation) and cytoscape.js
+(graph). It calls the same documented endpoints as any client, never `/api/reset`, never Cypher.
+Every answer keeps its `outcome`, so each of the seven outcomes has its own badge and "not in graph"
+is always worded as "not modelled", never "safe". One store feeds every panel: a result that arrives
+from the chat (`tool_result` events) updates the graph and panels exactly like a button press, so the
+chat and the buttons cannot disagree. Approve and Reject are plain buttons for a person; no automated
+path calls them, and the chat tool list does not include `record_decision`.
+The graph layout is deterministic and computed in the browser: entry points left, crown jewels right,
+the assets in between by distance, everything else in two dimmed bands. The console and Cytoscape are
+loaded lazily so the first load stays light. A Puppeteer script walks the whole story in a real
+browser (`npm run e2e`), locally and, with `--safe`, against the live site.
+
 ## Judge questions (15 likely, with short answers)
 
 1. **What does FalkorDB do here that Postgres could not?**
