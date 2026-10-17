@@ -1,7 +1,8 @@
 """FastAPI app. Every non-chat endpoint calls a tool function directly (no LLM involved)."""
+import hmac
 import time
 
-from fastapi import Depends, FastAPI, Query
+from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -88,8 +89,13 @@ def decisions(asset_name: str | None = Query(None, max_length=100), g: str = Dep
 
 
 @app.post("/api/reset", response_model=Envelope)
-def reset(g: str = Depends(graph_name)):
-    """Drop and rebuild the demo environment (idempotent)."""
+def reset(g: str = Depends(graph_name), x_reset_token: str | None = Header(None)):
+    """Drop and rebuild the demo environment (idempotent). Needs the X-Reset-Token header
+    to match the RESET_TOKEN env var; if RESET_TOKEN is empty, reset is disabled."""
+    if not config.RESET_TOKEN:
+        raise HTTPException(status_code=403, detail="Reset is disabled: RESET_TOKEN is not set on the server")
+    if not x_reset_token or not hmac.compare_digest(x_reset_token, config.RESET_TOKEN):
+        raise HTTPException(status_code=401, detail="Missing or wrong X-Reset-Token header")
     start = time.perf_counter()
     summary = seed_graph(g)
     ms = round((time.perf_counter() - start) * 1000, 1)

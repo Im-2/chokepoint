@@ -1,12 +1,16 @@
 """Run the whole demo story over HTTP and print the real numbers.
 Usage: python -m scripts.demo_run [base_url]      (default http://127.0.0.1:8000)
 It starts with /api/reset and ends with /api/reset, so the demo graph is left clean."""
+import os
 import sys
 
 import httpx
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8000"
-http = httpx.Client(base_url=BASE, timeout=120)
+http = httpx.Client(base_url=BASE, timeout=120, headers={"X-Reset-Token": os.getenv("RESET_TOKEN", "")})
 
 
 def call(method, path, body=None, params=None):

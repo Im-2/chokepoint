@@ -24,4 +24,5 @@ LLM_FALLBACK_API_KEY = os.getenv("LLM_FALLBACK_API_KEY", "")
 LLM_FALLBACK_MODEL = os.getenv("LLM_FALLBACK_MODEL", "")
 
 CHAT_ENABLED = _bool("CHAT_ENABLED", "true")
+RESET_TOKEN = os.getenv("RESET_TOKEN", "")
 ALLOWED_ORIGINS = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "*").split(",")]

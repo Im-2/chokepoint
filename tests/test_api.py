@@ -12,6 +12,8 @@ from app.seed import seed_graph
 
 @pytest.fixture(scope="module")
 def client():
+    from app import config
+    config.RESET_TOKEN = "test-token"
     name = f"test:api-{uuid.uuid4().hex[:8]}"
     assert name.startswith("test:")
     seed_graph(name)
@@ -27,7 +29,7 @@ def client():
 
 
 def post(client, path, body):
-    r = client.post(path, json=body)
+    r = client.post(path, json=body, headers={"X-Reset-Token": "test-token"} if path == "/api/reset" else {})
     assert r.status_code == 200, r.text
     return r.json()
 
@@ -94,3 +96,14 @@ def test_full_demo_story_over_rest(client):
     assert first_edge not in [s["edge_id"] for s in replan["data"]["plan"]]
     memory = client.get("/api/decisions").json()
     assert any(d["reason"] == "breaks nightly ETL" for d in memory["data"]["decisions"])
+
+
+def test_reset_requires_the_token(client):
+    from app import config
+    assert client.post("/api/reset").status_code == 401                                   # no header
+    assert client.post("/api/reset", headers={"X-Reset-Token": "wrong"}).status_code == 401
+    config.RESET_TOKEN = ""
+    try:                                                                                  # disabled
+        assert client.post("/api/reset", headers={"X-Reset-Token": "test-token"}).status_code == 403
+    finally:
+        config.RESET_TOKEN = "test-token"

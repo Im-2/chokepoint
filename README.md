@@ -17,6 +17,12 @@ Full README is written in Phase 6; this is a stub. API docs: run the server and 
 **Status: untested.** It was not run during development (no Docker on the dev machine); the
 project was developed and verified against FalkorDB Cloud only.
 
+### Reset token
+`POST /api/reset` drops and rebuilds the demo graph, so it is guarded. Set `RESET_TOKEN` in `.env`
+(see `.env.example`) and send it as the header `X-Reset-Token`. If `RESET_TOKEN` is empty, reset is
+disabled (403); a missing or wrong header gets 401. Reseeding from the command line
+(`python -m app.seed`) needs no token because it needs your `.env` anyway.
+
 ### Run the API and the demo story
 ```bash
 python -m uvicorn app.main:app --port 8000      # then open http://127.0.0.1:8000/docs
