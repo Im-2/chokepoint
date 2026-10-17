@@ -20,6 +20,7 @@ from mcp import Client
 from openai import APIConnectionError, APIStatusError, APITimeoutError, AsyncOpenAI
 
 from app import config
+from app.tools import NOT_MODELLED
 from app.mcp_server import build_server
 
 MAX_TOOL_CALLS = 6
@@ -447,7 +448,11 @@ async def _run_chat(message, history, graph_name, llm_clients):
             envelopes = [env for _, env in results]
             verdict = check_answer(text, envelopes) if text.strip() else Check(False, "empty answer")
             if verdict.ok:
-                yield _final(text.strip(), True, mode=f"llm-{label}")
+                text = text.strip()
+                if any(e["outcome"] == "not_in_graph" for e in envelopes) and "not a statement" not in text.lower():
+                    # never leave "no modelled path" standing alone: say plainly it is not a claim of safety
+                    text = f"{text} {NOT_MODELLED}"
+                yield _final(text, True, mode=f"llm-{label}")
             elif results:
                 tool, env = results[-1]
                 yield _final(summarize(tool, env), False, verdict.reason, mode=f"llm-{label}+template")

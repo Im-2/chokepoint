@@ -92,3 +92,18 @@ def test_model_sees_a_plain_outcome_name_for_no_path(seeded_graph):
     env = tools.explain_reachability("srv-alpha-01", graph_name=seeded_graph.name)
     shown = agent.compact(env)
     assert "no_modelled_path" in shown and "not_in_graph" not in shown
+
+
+def test_no_modelled_path_answer_always_carries_the_not_safe_statement(seeded_graph):
+    llm = FakeLLM(message(calls=[("explain_reachability", {"from_name": "srv-alpha-01"})]),
+                  message("srv-alpha-01 has no modelled path."))
+    events = run_llm(seeded_graph.name, [("primary", llm, "m")], "Is srv-alpha-01 safe?")
+    text = final(events)["text"]
+    assert final(events)["mode"] == "llm-primary" and final(events)["checked"] is True
+    assert text.startswith("srv-alpha-01 has no modelled path.")
+    assert "This is not a statement that the asset is safe" in text
+    # an answer that already says it is not duplicated
+    llm = FakeLLM(message(calls=[("explain_reachability", {"from_name": "srv-alpha-01"})]),
+                  message("No modelled path; that is not a statement that srv-alpha-01 is safe."))
+    again = final(run_llm(seeded_graph.name, [("primary", llm, "m")], "Is srv-alpha-01 safe?"))["text"]
+    assert again.lower().count("not a statement") == 1
