@@ -4,7 +4,7 @@
 
 Built for **Graph Hacks: Context for AI Agents (WeMakeDevs x FalkorDB), Track 01: Agents That Act on Connected Data.**
 
-**Demo video: <link>**
+**Demo video: https://youtu.be/8bjtyt3C3p0?si=hl3y3sZEV29P5cjV**
 
 | | |
 |---|---|
