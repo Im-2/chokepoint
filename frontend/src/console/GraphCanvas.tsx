@@ -190,7 +190,7 @@ export function GraphCanvas() {
 
   return (
     <div className="canvas">
-      <div ref={host} className="canvas__cy" role="img"
+      <div ref={host} className="canvas__cy" role="img" onMouseLeave={() => setTip(null)}
         aria-label={`Attack graph: ${graph?.nodes.length ?? 0} assets and ${graph?.edges.length ?? 0} connections. Highlighted paths are listed in the side panel.`} />
       {!ready && !failed && (
         <div className="canvas__overlay"><div className="canvas__skeleton"><Skeleton lines={5} height={16} /><span className="hint">Loading the graph…</span></div></div>

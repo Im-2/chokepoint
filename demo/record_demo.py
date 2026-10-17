@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parent
 parser = argparse.ArgumentParser()
 parser.add_argument("--base", default="https://trychokepoint.vercel.app")
 parser.add_argument("--no-mix", action="store_true")
+parser.add_argument("--mix-only", action="store_true", help="re-mix the last recording using demo/offsets.json")
 args = parser.parse_args()
 BASE = args.base
 
@@ -41,7 +42,7 @@ OVERLAY_JS = r"""
   #__ring{position:fixed;z-index:2147483646;pointer-events:none;width:44px;height:44px;border-radius:50%;border:3px solid rgba(255,255,255,.95);left:-50px;top:-50px;opacity:0}
   #__ring.go{animation:__ripple .55s ease-out}
   @keyframes __ripple{0%{opacity:.95;transform:translate(-50%,-50%) scale(.3)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.5)}}
-  #__cap{position:fixed;z-index:2147483645;left:50%;bottom:30px;transform:translateX(-50%);padding:11px 24px;border-radius:999px;
+  #__cap{position:fixed;z-index:2147483645;left:50%;bottom:16px;transform:translateX(-50%);padding:10px 24px;border-radius:999px;
     background:rgba(8,8,8,.86);border:1px solid rgba(255,255,255,.2);color:#f4f1ea;font:500 21px/1.3 Inter,system-ui,sans-serif;
     opacity:0;transition:opacity .4s;pointer-events:none;max-width:84vw;text-align:center;white-space:nowrap}
   #__cap.on{opacity:1}
@@ -224,7 +225,7 @@ def run():
         t = R.segment("s03_graph")
         R.scroll_window(1050, 3.5)   # the three step cards
         R.pause(1.2)
-        R.bring_window(".console__grid", 105, 3.0)
+        R.bring_window(".console__grid", 78, 3.0)
         R.caption("130 assets · 322 attack edges · stored in FalkorDB")
         page.wait_for_selector(".canvas__cy canvas")
         R.check(page.locator(".stat__value").nth(0).inner_text() == "130", "130 assets on screen")
@@ -232,7 +233,7 @@ def run():
         R.bring_window(".chead", 70, 1.0)
         R.hover(page.locator(".stat").nth(0), 0.8)
         R.hover(page.locator(".stat").nth(1), 0.8)
-        R.bring_window(".console__grid", 105, 1.0)
+        R.bring_window(".console__grid", 78, 1.0)
         R.hover(page.locator(".canvas__cy"), 1.0)
         R.end_segment("s03_graph")
 
@@ -458,6 +459,10 @@ def mix(video: Path, trim: float, starts: dict):
 
 
 if __name__ == "__main__":
+    if args.mix_only:
+        saved = json.loads((ROOT / "offsets.json").read_text(encoding="utf-8"))
+        mix(VIDEO_DIR / saved["video"], saved["trim"], saved["starts"])
+        sys.exit(0)
     video, trim, starts, fallbacks = run()
     if fallbacks:
         print("\nThe free-tier model fell back during the chat scene:")
