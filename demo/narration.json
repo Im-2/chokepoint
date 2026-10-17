@@ -1,0 +1,89 @@
+{
+  "voice": {
+    "name": "George - Warm, Captivating Storyteller",
+    "voice_id": "JBFqnCBsd6RMkjVDRZzb",
+    "model": "eleven_multilingual_v2",
+    "requested": {
+      "name": "Adam Stone - Smooth and Relaxed",
+      "voice_id": "auq43ws1oslv0tO4BDa7",
+      "blocked": "HTTP 402: free ElevenLabs plans cannot use Voice Library voices through the API. To use it, upgrade or add $5 of credits, then set voice to the requested one and rerun demo/make_narration.py --force and demo/record_demo.py."
+    }
+  },
+  "segments": [
+    {
+      "id": "s01_intro",
+      "scene": "Landing",
+      "text": "This is Chokepoint. One thing first: this voiceover is AI-generated. Everything you see on screen is the real product, running live, and none of the results are edited."
+    },
+    {
+      "id": "s02_problem",
+      "scene": "Landing",
+      "text": "Every company has crown-jewel data, like a customer database. The hard question is simple: how could an attacker actually get there, and what is the smallest change that stops them? A spreadsheet of permissions cannot answer that. A graph can."
+    },
+    {
+      "id": "s03_graph",
+      "scene": "Console",
+      "text": "This is a synthetic cloud: one hundred and thirty assets and three hundred and twenty-two attack edges, stored in FalkorDB, the primary database behind everything you will see. Assets are nodes. Every possible pivot is an edge, with a cost and a disruption score."
+    },
+    {
+      "id": "s04_depth2",
+      "scene": "Depth contrast",
+      "text": "Scan two hops, and there is nothing. Zero paths. Three hops, still zero. But read the wording. No modelled path is not the same as safe."
+    },
+    {
+      "id": "s05_depth4",
+      "scene": "Depth contrast",
+      "text": "At four hops, one path appears. It runs through svc-legacy-etl, a forgotten service account that nobody had modelled as dangerous. It assumes a deploy role, which assumes an admin role, which reaches the customer database. Go deeper, to eight hops, and there are nineteen paths."
+    },
+    {
+      "id": "s06_decoy",
+      "scene": "Choke edges",
+      "text": "Which edge do we fix? Rank by paths through it, and you get this one: fifteen paths. But its disruption is nine out of ten. Cut it, and you break production. That is the decoy. Rank by paths cut per unit of disruption, and another edge wins: eleven paths, at a disruption of two."
+    },
+    {
+      "id": "s07_plan_sim",
+      "scene": "Plan and simulate",
+      "text": "The planner picks two edges. Together they cut all nineteen paths, at a total disruption of five. It says plainly that this is a greedy heuristic, not a proof. So we prove it: copy the graph, apply the fix to the copy, search again. Nineteen paths before. Zero after. The copy is deleted."
+    },
+    {
+      "id": "s08a_chat_intro",
+      "scene": "Ask Chokepoint",
+      "text": "Now the same graph, through chat. Ask Chokepoint."
+    },
+    {
+      "id": "s08b_chat_q1",
+      "scene": "Ask Chokepoint",
+      "text": "The model can only choose from a fixed catalogue of tools, over the Model Context Protocol. It never writes Cypher. Here it picks the reachability tool, and gets the five-hop path."
+    },
+    {
+      "id": "s08c_chat_q2",
+      "scene": "Ask Chokepoint",
+      "text": "Next, plan and simulate. It plans first, then simulates exactly the edges the plan chose, and the trace fills with every query."
+    },
+    {
+      "id": "s08d_chat_q3",
+      "scene": "Ask Chokepoint",
+      "text": "Now the honest one. Is this machine safe? No path is modelled, and that is not a statement that it is safe. An answer checker rejects any sentence naming an asset the graph did not return."
+    },
+    {
+      "id": "s09_propose_reject",
+      "scene": "Human decision",
+      "text": "Back to the fix. Propose just the first edge. A change record is written, with an owning team found by traversing the graph, a ticket, and a config diff. Only a person can approve or reject. I reject it, with a reason: C I needs prod-admin during releases."
+    },
+    {
+      "id": "s10_replan_memory",
+      "scene": "Memory",
+      "text": "Now re-plan. The agent reads that decision from the graph, skips the rejected edge, and finds three cheaper ones. Fifteen of nineteen paths cut, total disruption six, and it says plainly that four remain. The memory lives in the graph, so it survives restarts."
+    },
+    {
+      "id": "s11_unknown",
+      "scene": "Honesty",
+      "text": "Ask about an asset that does not exist, and you get unknown asset. No query runs at all."
+    },
+    {
+      "id": "s12_close",
+      "scene": "Trace and close",
+      "text": "Every response carries its own trace. The same nine tools are an MCP server that any agent can use. FalkorDB does the work: path search, choke ranking, shortest paths, scratch-graph simulation, and decision memory. Take it away, and none of this exists. This was Chokepoint, for Graph Hacks, Track one."
+    }
+  ]
+}
