@@ -71,8 +71,9 @@ try:
     banned = [f for f in files if re.search(r"(^|/)\.env$|\.env\.local$|^ui/|\.mp4$|^demo/audio/|\.mp3$", f)]
     item("No .env, design video, demo video or audio clips committed", not banned, f"git ls-files has none of them (found: {banned or 'none'})")
 
-    stale = [f for f in files if (clone / f).is_file() and "chokepoint-alpha" in (clone / f).read_text(encoding="utf-8", errors="ignore")]
-    item("Old URL gone from every file", not stale, f"no file mentions chokepoint-alpha (found in: {stale or 'none'})")
+    old_host = "chokepoint" + "-alpha"  # the retired deployment name, built here so this file does not contain it
+    stale = [f for f in files if (clone / f).is_file() and old_host in (clone / f).read_text(encoding="utf-8", errors="ignore")]
+    item("Retired deployment URL gone from every file", not stale, f"no tracked file mentions the old URL (found in: {stale or 'none'})")
 finally:
     shutil.rmtree(work, ignore_errors=True)
 
