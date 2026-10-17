@@ -93,5 +93,58 @@ Tool results are compacted before the model sees them (names and numbers, no tra
 characters), the system prompt is short, and tool descriptions are trimmed, because free tiers allow
 only about 6,000 tokens a minute. Full detail goes to the HTTP response (the frontend), not the model.
 
-## Judge questions
-(Filled in at Phase 6.)
+## Judge questions (15 likely, with short answers)
+
+1. **What does FalkorDB do here that Postgres could not?**
+   Variable-length path enumeration, per-edge path counts, weighted shortest path, betweenness, and
+   `GRAPH.COPY` for scratch-graph simulation. In SQL these are recursive CTEs with no built-in
+   algorithms, and a copy-edit-requery simulation would mean copying tables.
+2. **Why one relationship type, `PIVOT`?**
+   Path patterns and the algorithms take a relationship type. One type with a `kind` property keeps
+   `*1..N` patterns and `algo.SPpaths` simple.
+3. **Why does the model never write Cypher?**
+   Safety and reliability. A fixed catalogue of nine human-written, parameterised tools means the
+   model can only choose a tool and fill typed arguments. Names are resolved against the graph first.
+4. **How do you stop injection?**
+   Names and ids are always query parameters. The only inlined value is `depth`, validated as an
+   integer 1 to 8 (FalkorDB rejects a parameter in `*1..$depth`, which we tested). Tests throw quotes
+   and Cypher fragments at the name arguments and check the graph is unchanged.
+5. **What is the decoy edge and why does it matter?**
+   `role-prod-admin -> prod-customer-db` is on 15 of 19 paths but disruption 9. Ranking by raw path
+   count picks it; paths cut per disruption picks `role-ci-deployer -> role-prod-admin` (11 paths,
+   disruption 2). It shows why the planner is cost-aware.
+6. **Is the plan optimal?**
+   No. It is weighted set cover (NP-hard), solved greedily, and every plan says so. It stops when no
+   paths remain and never picks an edge that cuts nothing.
+7. **How do you prove a fix works?**
+   Copy the graph to `sim:<uuid>`, delete the edges there, re-run the same path query, report
+   before and after (19 -> 0), then delete the copy in a `finally`. The real graph is never touched,
+   and the agent may only say "verified" if `simulate_fix` ran.
+8. **How does memory work, and why in the graph?**
+   A proposal creates `Decision` nodes linked to the assets. A rejection (with a reason) is read by
+   the planner next time and that edge is excluded. Because it is in the graph, it survives restarts
+   and any server instance sees it.
+9. **What if the LLM lies?**
+   The answer checker verifies every model sentence: names, edge ids and numbers must appear in the
+   tool results; no "safe"; no impact claims when nothing was found; no "verified" without
+   `simulate_fix`; no "cannot reach" for an unmodelled path. On failure the templated sentence is
+   returned with `checked: false`.
+10. **Does it work without an LLM?**
+    Yes. A deterministic router maps keywords to tools and templates the sentence. `CHAT_ENABLED=false`
+    forces it, and it is also the fallback on rate limits or errors. All buttons use it too.
+11. **Why MCP, and how is the agent connected to it?**
+    MCP gives any client the same nine tools. The agent lists the tools over the SDK's in-memory
+    transport rather than keeping a private list, and a test checks the MCP result equals the REST result.
+12. **Why is the MCP server stateless, and what does that cost?**
+    Serverless functions cannot hold sessions. Stateless streamable HTTP treats every request alone,
+    so server-initiated features are unavailable, which we do not need.
+13. **What does "no path" mean?**
+    "Not modelled", never "safe". Depth 2 returns nothing because the shortest path is 4 hops, and the
+    note says the dependency may not be modelled.
+14. **What are the weaknesses?**
+    Synthetic and small data, greedy plan, depth cap of 8, open write tools except reset, strict
+    answer checker, Cloud latency of about 130 to 250 ms per query, and Docker/Gemini paths untested.
+15. **What did the AI do, and what did you do?**
+    Claude Code wrote code under direction; the developer reviewed the model, the queries and the
+    design decisions in this file and can explain each one. One example found by testing rather than
+    assuming: FalkorDB rejects a parameter as a path-depth bound, a fact that changed the design.
