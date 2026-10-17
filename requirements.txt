@@ -1,9 +1,9 @@
-fastapi
-uvicorn[standard]
-falkordb
-python-dotenv
-pydantic
-openai
-mcp
-httpx
-pytest
+# Runtime dependencies (pinned to the versions the tests ran against)
+fastapi==0.143.3
+uvicorn==0.54.0
+falkordb==1.8.0
+mcp==2.3.0
+openai==3.33.0
+pydantic==2.14.1
+python-dotenv==1.2.4
+httpx==0.28.1

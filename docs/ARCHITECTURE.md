@@ -52,4 +52,4 @@ instance has little memory).
 Stateless handlers (no local disk, threads or caches that matter), stateless MCP over HTTP (no
 session ids, no stdio subprocess), configuration by environment variables, `requirements.txt`,
 CORS configurable, best-effort rate limiting only. FalkorDB runs outside Vercel (Cloud for
-deployment; Docker for local, untested). Deployment itself is Phase 8 and has not been done yet.
+deployment; Docker for local, untested). Deployed on Vercel (region `dub1`, next to the AWS eu-west-1 database) at https://chokepoint-alpha.vercel.app.

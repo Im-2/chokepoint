@@ -1,0 +1,12 @@
+.venv
+.git
+.env
+.env.*
+!.env.example
+tests
+docs
+scripts
+__pycache__
+.pytest_cache
+CHOKEPOINT_BUILD_PROMPT.md
+ui

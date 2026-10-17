@@ -7,7 +7,7 @@ Built for **Graph Hacks: Context for AI Agents (WeMakeDevs x FalkorDB), Track 01
 | | |
 |---|---|
 | Repo | https://github.com/Im-2/chokepoint |
-| Live deployment | _Not deployed yet._ Planned: Vercel (API) + FalkorDB Cloud (database). Local setup below works today. |
+| Live deployment | **https://chokepoint-alpha.vercel.app** (API docs at [/docs](https://chokepoint-alpha.vercel.app/docs), MCP at `/mcp`). Vercel + FalkorDB Cloud. |
 | Demo video | _To be added._ Script: [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) |
 | Study guide | [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md) (design decisions + judge Q&A) |
 
@@ -151,7 +151,7 @@ You need Python 3.12 and a FalkorDB. The project was developed and verified agai
 
 ```bash
 python -m venv .venv
-.venv/Scripts/pip install -r requirements.txt       # Windows; on macOS/Linux: .venv/bin/pip
+.venv/Scripts/pip install -r requirements-dev.txt   # Windows; on macOS/Linux: .venv/bin/pip
 cp .env.example .env                                # then fill in your FalkorDB host, port, password
 python -m app.seed                                  # writes the demo graph env:acme
 python -m uvicorn app.main:app --port 8000          # API + docs at http://127.0.0.1:8000/docs
@@ -179,9 +179,25 @@ python -m pytest                                    # 69 tests; they only touch 
 
 Try it: `python -m scripts.chat_run "Can intern-laptop reach prod-customer-db? Why?"`
 
-### Deployment
+### Deployment (live)
 
-The code is built for Vercel (`api/index.py` exports the ASGI app; stateless, no local state, MCP over stateless HTTP) with FalkorDB Cloud as the database, but **it has not been deployed yet**; the live URL will be recorded here. Everything runs locally against FalkorDB Cloud today.
+Deployed on **Vercel** (FastAPI preset, Python 3.12, single function) with **FalkorDB Cloud** as the
+database: https://chokepoint-alpha.vercel.app
+
+- `app/main.py` exposes the ASGI `app` (Vercel's FastAPI preset finds it; `api/index.py` re-exports
+  it). `vercel.json` pins the function to `dub1` (Dublin) because the database runs in AWS eu-west-1:
+  a query takes about 2 ms server-side there, against about 150 ms from far away.
+- Stateless: no disk, no background threads, MCP over stateless HTTP; the FastAPI lifespan starts the
+  MCP session manager.
+- Environment variables (set in Vercel, never in git): `FALKORDB_*`, `RESET_TOKEN`, `CHAT_ENABLED`,
+  `ALLOWED_ORIGINS`, `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`. Sensitive ones are marked sensitive.
+- Deploy yourself: `npm i -g vercel`, `vercel link`, add the variables with `vercel env add`, then
+  `vercel deploy --prod`. `.vercelignore` keeps tests, docs and scripts out of the bundle.
+- Verified on the live URL: `/healthz`, `/api/scan` (depth 2: nothing; depth 4: 1 path; depth 8: 19),
+  `/api/graph`, `/api/reach`, `/mcp` (MCP SDK client lists 9 tools and calls them), SSE `/api/chat`
+  (Groq through MCP, answer checker accepted), `/api/reset` (401 without the token).
+- The public chat endpoint uses a free-tier key and a per-instance rate limit; set `CHAT_ENABLED=false`
+  in Vercel to fall back to the no-LLM router if the quota is abused.
 
 ---
 

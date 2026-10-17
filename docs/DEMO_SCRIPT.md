@@ -8,7 +8,7 @@ Each step is one API call. When the frontend exists, each step is one button; th
 graph freshly reset:
 
 ```bash
-BASE=http://127.0.0.1:8000
+BASE=https://chokepoint-alpha.vercel.app      # or http://127.0.0.1:8000 for a local server
 curl -s -X POST $BASE/api/reset -H "X-Reset-Token: $RESET_TOKEN"     # 130 assets, 322 PIVOT edges
 ```
 

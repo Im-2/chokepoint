@@ -9,7 +9,7 @@ Status: ✅ done · 🟡 partial / planned · ⬜ not started. Re-checked before
 | 3 | README with setup + graph data model | `README.md` (data model, setup, Cloud and Docker options) | ✅ README has setup and the graph data model |
 | 4 | Cypher queries / algorithms list | `app/queries.py` (all Cypher) + `docs/QUERIES.md` | ✅ all current queries documented in docs/QUERIES.md |
 | 5 | Demo video | Script in `docs/DEMO_SCRIPT.md`; video link in README | 🟡 script ready (docs/DEMO_SCRIPT.md); the video itself is for the developer to record, link goes in the README |
-| 6 | Deployment or local setup instructions | README: FalkorDB Cloud + `docker-compose.yml` (optional local); Vercel in Phase 8 | 🟡 local setup documented (README); compose file untested and marked so; Vercel deploy is Phase 8 |
+| 6 | Deployment or local setup instructions | README: FalkorDB Cloud + `docker-compose.yml` (optional local); live on Vercel | ✅ live at https://chokepoint-alpha.vercel.app, verified; local setup documented; compose file untested and marked so |
 | 7 | AI-assistance disclosure | README section; `docs/WALKTHROUGH.md` shows the human can explain the design | ✅ README section "AI-assistance disclosure"; study guide docs/WALKTHROUGH.md |
 | 8 | Track 01 named | README top section | ✅ README section "AI-assistance disclosure"; study guide docs/WALKTHROUGH.md |
 | 9 | Public repo, no secrets | `.gitignore` excludes `.env`; only `.env.example` committed; secret scan before each commit | ✅ public repo https://github.com/Im-2/chokepoint; history scrubbed and scanned |
@@ -33,7 +33,7 @@ the real `.env` values); local setup instructions; `.env` never committed.
 
 Still missing or open (be honest in the submission):
 - **Demo video:** not recorded (the developer records it; script is ready). Add the link to the README.
-- **Live deployment:** not done (Phase 8). The README says so; add the URL when it exists.
+- **Live deployment:** done in Phase 8 (https://chokepoint-alpha.vercel.app). Keep it working until judging.
 - **Frontend:** not built (Phase 7, waits for the developer's design). `/docs` is the only UI.
 - **Untested:** `docker-compose.yml` (no Docker on the dev machine) and the Gemini fallback settings.
 - **Not done on purpose:** authentication on write tools other than `/api/reset`.
