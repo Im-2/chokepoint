@@ -26,3 +26,4 @@ demo/video/
 demo/frames/
 demo/*.log
 demo/qa_shots/
+demo/offsets.json
