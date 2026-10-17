@@ -32,6 +32,10 @@ export function PlanCard() {
                   <p className="plan-step__chips">
                     <span className="chip">disruption {s.disruption}/10</span>
                     <span className="chip chip--fix">cuts {plural(s.paths_cut, "path")}</span>
+                    <button className="chip chip--button" disabled={proposal.status === "loading"}
+                      onClick={() => actions.runPropose(`Proposed on its own: ${s.fix_text}`, [s.edge_id])}>
+                      Propose only this edge
+                    </button>
                   </p>
                 </div>
               </li>

@@ -79,7 +79,8 @@ export interface Actions {
   runChoke(): Promise<void>;
   runPlan(budget: number): Promise<void>;
   runSimulate(edgeIds?: string[]): Promise<void>;
-  runPropose(note?: string): Promise<void>;
+  /** Propose the whole plan, or only the given edges (a person may want to contest a single edge). */
+  runPropose(note?: string, edgeIds?: string[]): Promise<void>;
   runDecide(action: "approve" | "reject", reason?: string): Promise<void>;
   loadDecisions(): Promise<void>;
   selectPath(index: number | null): void;
@@ -178,9 +179,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const env = await call("sim", "POST /api/simulate", () => api.simulate(ids));
       if (env) handlers.onSim(env);
     },
-    async runPropose(note) {
+    async runPropose(note, edgeIds) {
       const plan = stateRef.current.plan.data;
-      const ids = plan?.data.plan.map((s) => s.edge_id) ?? [];
+      const ids = edgeIds ?? plan?.data.plan.map((s) => s.edge_id) ?? [];
       if (!ids.length) return;
       const env = await call("proposal", "POST /api/propose", () => api.propose(ids, note));
       if (env) {

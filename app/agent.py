@@ -122,6 +122,11 @@ def check_answer(sentence: str, envelopes: list[dict]) -> Check:
             and not any(e["outcome"] == "unknown_asset" for e in envelopes):
         return Check(False, "the asset exists; the graph only has no modelled path for it")
 
+    for e in envelopes:  # a fix that leaves paths standing is not "verified" without saying so
+        if e["outcome"] == "verified_fix" and e["data"].get("paths_after", 0) > 0 and re.search(r"\bverified\b", text) \
+                and not re.search(r"remain|left|leav|still|residual|not a complete|partial", text):
+            return Check(False, "the sentence says verified but paths remain after the fix")
+
     if re.search(r"\bverif\w*", text) and not any(e["outcome"] == "verified_fix" for e in envelopes):
         return Check(False, "the sentence says verified but simulate_fix did not run")
     if re.search(r"\bi (?:have )?(?:approved|rejected)\b", text):

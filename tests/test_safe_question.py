@@ -128,3 +128,12 @@ def test_edges_the_user_names_are_respected(seeded_graph):
     llm = FakeLLM(message(calls=[("simulate_fix", {"edge_ids": ["e023"]})]), message("Simulated e023."))
     events = run_llm(seeded_graph.name, [("primary", llm, "m")], "Simulate e023")
     assert next(e for e in events if e["event"] == "tool_call")["args"]["edge_ids"] == ["e023"]
+
+
+def test_verified_is_not_claimed_while_paths_remain(seeded_graph):
+    sim = tools.simulate_fix(["e023"], graph_name=seeded_graph.name)          # leaves 8 of 19
+    assert sim["data"]["paths_after"] == 8
+    assert not agent.check_answer("The fix is verified.", [sim]).ok
+    assert agent.check_answer("Verified on a scratch copy: 8 paths remain after the fix.", [sim]).ok
+    full = tools.simulate_fix(["e023", "e022"], graph_name=seeded_graph.name)  # leaves 0
+    assert agent.check_answer("The fix is verified.", [full]).ok

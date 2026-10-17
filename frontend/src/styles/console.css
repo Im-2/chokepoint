@@ -261,3 +261,7 @@ textarea.input { resize: vertical; }
   .beforeafter { gap: 4px; }
   .ba__num { font-size: 44px; }
 }
+
+.chip--button { cursor: pointer; background: transparent; color: var(--text-muted); transition: color 0.15s, border-color 0.15s; }
+.chip--button:hover:not(:disabled) { color: var(--text-display); border-color: rgba(255, 255, 255, 0.4); }
+.chip--button:disabled { opacity: 0.45; cursor: not-allowed; }

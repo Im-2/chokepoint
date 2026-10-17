@@ -148,7 +148,7 @@ try {
 
   if (!safe) {
     // propose -> reject with a reason -> re-plan
-    await clickText("Propose change");
+    await clickText("Propose change");  // whole plan
     await waitFor(() => document.querySelector(".ticket"), "ticket");
     check("proposal shows an owner team", (await text(".chips")).length > 0 && (await page.$$eval(".chip--owner", (e) => e.length)) > 0);
     check("config diff is shown", (await text(".diff-block")).includes("assume_role"));
