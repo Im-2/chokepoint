@@ -46,7 +46,7 @@ Open https://trychokepoint.vercel.app and press **Launch console**. Each step is
 | Plan | **Rank choke edges** (decoy marked), budget 3, **Plan remediation** (2 edges, 19 of 19) |
 | Simulate | **Simulate on a scratch copy**, then toggle Before / After (19 to 0, removed edges drawn cut) |
 | Propose and decide | **Propose change**, then **Reject...** with a reason; **Plan remediation** again (the rejected edges are skipped; the UI rejects the whole proposal) |
-| Honesty | Reach from `ghost-host-99` (Unknown asset) and from `srv-alpha-01` (Not in graph) |
+| Honesty | Reach from `ghost-host-99` (Unknown asset) and from `srv-alpha-01` (No modelled path) |
 | Chat | Dock **Ask Chokepoint**, click a suggested prompt; point at the tool chip, the "checked" badge and the mode indicator |
 
 After recording, restore the demo state with the reset call above (needs the token).

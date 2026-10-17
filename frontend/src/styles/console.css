@@ -243,3 +243,21 @@ textarea.input { resize: vertical; }
 .console__left { padding-bottom: 16px; }
 .edge-name { display: flex; flex-direction: column; word-break: normal; overflow-wrap: anywhere; line-height: 1.35; }
 .chain__arrow { color: var(--text-muted); font-size: 12px; }
+
+/* ===== phone and narrow-screen fixes found in QA ===== */
+.console__left, .console__centre, .console__right { min-width: 0; }
+.card, .card__body, .ticket, .diff-block, .table-wrap { min-width: 0; max-width: 100%; }
+.ticket { overflow-wrap: anywhere; overflow-x: auto; }
+.diff-block { overflow-x: auto; }
+@media (max-width: 1024px) {
+  .console__grid { grid-template-columns: minmax(0, 1fr); }
+  .canvas { flex: none; height: 72svh; min-height: 440px; }
+}
+@media (max-width: 640px) {
+  .console { padding-left: 14px; padding-right: 14px; }
+  .table-wrap .table { min-width: 470px; }
+  .stat { min-width: 0; flex: 1 1 130px; }
+  .stat__value { font-size: 22px; }
+  .beforeafter { gap: 4px; }
+  .ba__num { font-size: 44px; }
+}

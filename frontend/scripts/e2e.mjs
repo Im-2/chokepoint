@@ -81,7 +81,7 @@ try {
   const warn = await text(".note--warn");
   check("depth 2 shows no modelled path", /no modelled attack path within 2 hops/i.test(warn), warn.slice(0, 60));
   check("depth 2 says it is not a statement of safety", /not a statement that the asset is safe/i.test(warn));
-  check("depth 2 badge is Not in graph", (await text(".card .badge")).includes("Not in graph"));
+  check("depth 2 badge is No modelled path", (await text(".card .badge")).includes("No modelled path"));
   await shot("console-scan-depth2");
 
   // depth 4: the hidden path
@@ -115,7 +115,7 @@ try {
   await page.keyboard.type("srv-alpha-01");
   await clickText("Check reach");
   await waitFor(() => /not a statement that the asset is safe/i.test(document.querySelector(".note--warn")?.textContent ?? ""), "no-path note");
-  check("no-path asset: not_in_graph, never 'safe'", (await text(".card .badge")).includes("Not in graph"));
+  check("no-path asset: not_in_graph, never 'safe'", (await text(".card .badge")).includes("No modelled path"));
   await shot("console-reach-nopath");
 
   // choke ranking with the decoy

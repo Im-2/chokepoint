@@ -10,7 +10,7 @@ export function outcomeInfo(outcome: Outcome): OutcomeInfo {
     case "answered_from_memory":
       return { label: "From memory", tone: "neutral", hint: "Answered from decisions stored in the graph." };
     case "not_in_graph":
-      return { label: "Not in graph", tone: "warn", hint: "No modelled path. This is not a statement that the asset is safe: the dependency may not be modelled." };
+      return { label: "No modelled path", tone: "warn", hint: "No modelled path. This is not a statement that the asset is safe: the dependency may not be modelled." };
     case "unknown_asset":
       return { label: "Unknown asset", tone: "warn", hint: "That name is not in the graph, so nothing was searched." };
     case "verified_fix":

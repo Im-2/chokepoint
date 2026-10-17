@@ -17,7 +17,8 @@ function Icon({ children, className = "" }: { children: ReactElement; className?
 }
 
 export function Legend() {
-  const [open, setOpen] = useState(true);
+  // open on laptops; collapsed on phones, where it would otherwise cover the graph
+  const [open, setOpen] = useState(() => window.matchMedia("(min-width: 700px)").matches);
   return (
     <aside className="legend" aria-label="Graph legend">
       <button className="legend__toggle" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
